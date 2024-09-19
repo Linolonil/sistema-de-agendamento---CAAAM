@@ -11,6 +11,19 @@ const roomSchema = new Schema({
   isOccupied: {
     type: Boolean,
     default: false
+  },
+  hasAirConditioning: {
+    type: Boolean,
+    default: false,  // Indica se a sala tem ar-condicionado
+  },
+  hasTV: {
+    type: Boolean,
+    default: false,  // Indica se a sala tem TV
+  },
+  capacity: {
+    type: Number,
+    required: true,  // Quantas pessoas a sala suporta
+    min: 1          // Valor mínimo de capacidade, por exemplo, 1
   }
 }, { timestamps: true });
 

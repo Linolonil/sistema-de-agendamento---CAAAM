@@ -1,4 +1,5 @@
 import User from '../models/User.js';
+import argon2 from 'argon2';
 
 // Criar um novo usuário
 const createUser = async (req, res) => {
@@ -35,7 +36,8 @@ const getAllUsers = async (req, res) => {
 // Buscar um usuário pelo ID
 const getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const { id } = req.params;
+    const user = await User.findById(id);
     if (!user) return res.status(404).json({ message: 'Usuário não encontrado' });
 
     res.status(200).json(user);

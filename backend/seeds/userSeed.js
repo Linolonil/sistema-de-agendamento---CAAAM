@@ -21,9 +21,11 @@ const seedUsers = async () => {
 
   // Dados de exemplo
   const users = [
-    { name: 'admin', role: 'admin', password: 'admin123' },
-    { name: 'user1', role: 'user', password: 'user123' },
-    { name: 'user2', role: 'user', password: 'user123' },
+    { name: 'Thiago', role: 'admin', password: 'admin123' },  // Efetivado
+    { name: 'Ana Tereza', role: 'admin', password: 'admin123' },  // Efetivado
+    { name: 'Eloisa', role: 'intern', password: 'intern123' },  // Estagiário
+    { name: 'Alice', role: 'intern', password: 'intern123' },  // Estagiário
+    { name: 'Lino', role: 'intern', password: 'intern123' },  // Estagiário
   ];
 
   for (const userData of users) {

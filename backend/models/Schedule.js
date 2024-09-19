@@ -16,7 +16,7 @@ const scheduleSchema = new Schema({
     ref: 'Lawyer',
     required: true
   },
-  clientId: {
+  userId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true

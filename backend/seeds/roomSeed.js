@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Room from '../models/Room.js';
+import Room from '../models/Room.js';  // Certifique-se de que o caminho está correto
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -18,13 +18,22 @@ const connectDB = async () => {
 export const seedRooms = async () => {
   await connectDB();
 
-  // Dados de exemplo para 12 salas
-  for (let i = 1; i <= 12; i++) {
-    const room = new Room({
+  // Dados de exemplo
+  const rooms = [];
+  for (let i = 1; i <= 13; i++) {
+    rooms.push({
       number: i,
+      hasAirConditioning: false,
+      hasTV: false,
+      capacity: 20,  // Exemplo de capacidade; ajuste conforme necessário
     });
+  }
+
+  // Salvar as salas no banco de dados
+  for (const roomData of rooms) {
+    const room = new Room(roomData);
     await room.save();
-    console.log(`Sala ${i} salva com sucesso.`);
+    console.log(`Sala número ${roomData.number} salva com sucesso.`);
   }
 
   mongoose.connection.close();

@@ -20,8 +20,11 @@ export const seedLawyers = async () => {
 
   // Dados de exemplo
   const lawyers = [
-    { name: 'Dr. John Doe', oab: '12345', phone: '123-456-7890' },
-    { name: 'Dr. Jane Smith', oab: '67890', phone: '987-654-3210' },
+    { name: 'Dr. João Silva', oab: '112233', phoneNumber: '111-222-3333', role: 'advogado' },
+    { name: 'Dr. Maria Oliveira', oab: '445566', phoneNumber: '444-555-6666', role: 'advogado' },
+    { name: 'Dr. Pedro Souza', oab: '778899', phoneNumber: '777-888-9999', role: 'assistente' },
+    { name: 'Dr. Ana Costa', oab: '334455', phoneNumber: '333-444-5555', role: 'paralegal' },
+    { name: 'Dr. Carlos Mendes', oab: '667788', phoneNumber: '666-777-8888', role: 'advogado' },
   ];
 
   for (const lawyerData of lawyers) {

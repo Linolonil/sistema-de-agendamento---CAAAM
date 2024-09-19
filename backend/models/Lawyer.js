@@ -5,6 +5,10 @@ const { Schema } = mongoose;
 const lawyerSchema = new Schema({
   name: {
     type: String,
+      required: true
+    },
+  role: {
+    type: String,
     required: true
   },
   oab: {

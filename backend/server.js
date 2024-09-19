@@ -23,9 +23,9 @@ app.use(cors())
 //  rotas
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
-app.use('/api/v1/schedules', scheduleRoutes);
 app.use('/api/v1/lawyer', lawyerRoutes);
 app.use('/api/v1/room', roomRoutes);
+app.use('/api/v1/schedules', scheduleRoutes);
 
 
 const PORT = process.env.PORT || 3000;
