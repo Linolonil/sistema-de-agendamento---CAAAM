@@ -38,7 +38,7 @@ const loginUser = async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: 'Credenciais inválidas' });
 
     // Gerar um token JWT
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    const token = jwt.sign({ id: user._id, role: user.role, name: user.name }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
     res.status(200).json({ token });
   } catch (error) {
