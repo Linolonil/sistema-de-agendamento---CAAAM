@@ -166,6 +166,7 @@ const deleteSchedules = async (req, res) => {
 const getSchedulesByDay = async (req, res) => {
   try {
     const { date } = req.query; // Obter a data da query param
+    console.log(date);
     if (!date) {
       return res.status(400).json({ message: 'Por favor, forneça uma data válida.' });
     }
@@ -192,13 +193,14 @@ const getSchedulesByDay = async (req, res) => {
     .populate("lawyerId")
     .populate("userId");
 
-    if (schedules.length === 0) {
+
+    if (!schedules) {
       return res.status(404).json({
         message: 'Nenhum agendamento encontrado para essa data.',
         availableRooms: [], // Aqui você pode adicionar lógica para retornar as salas disponíveis, se necessário
       });
     }
-
+    
     res.status(200).json(schedules);
   } catch (error) {
     res.status(500).json({ message: error.message });

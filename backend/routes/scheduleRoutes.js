@@ -11,18 +11,18 @@ router.post('/',authMiddleware, scheduleController.createSchedule);
 router.get('/',authMiddleware, scheduleController.getAllSchedules);
 
 // Buscar um agendamento pelo ID
-router.get('/:id', scheduleController.getScheduleById);
+router.get('/:id',authMiddleware, scheduleController.getScheduleById);
 
 // Buscar agendamentos de um dia
-router.get('/schedules/day', scheduleController.getSchedulesByDay);
+router.get('/schedules/day',authMiddleware, scheduleController.getSchedulesByDay);
 
 // Confirmar um agendamento
-router.patch('/:id/confirm', scheduleController.confirmSchedule);
+router.patch('/:id/confirm',authMiddleware, scheduleController.confirmSchedule);
 
 // deletar todos os agendamentos 
-router.delete('/deleteAll', scheduleController.deleteAllSchedules);
+router.delete('/deleteAll',authMiddleware, scheduleController.deleteAllSchedules);
 
-// deletar todos os agendamentos 
-router.delete('/delete/:id', scheduleController.deleteSchedules);
+// deletar um agendamento
+router.delete('/delete/:id',authMiddleware, scheduleController.deleteSchedules);
 
 export default router;
