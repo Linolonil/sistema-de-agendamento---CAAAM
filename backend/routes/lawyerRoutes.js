@@ -9,8 +9,8 @@ router.post('/', async (req, res) => {
     const { name, oab, phoneNumber } = req.body;
 
     // Verificar se o advogado já existe
-    const existingLawyer = await Lawyer.findOne({ name });
-    if (existingLawyer) return res.status(400).json({ message: 'Advogado já cadastrado' });
+    const existingLawyer = await Lawyer.findOne({ oab });
+    if (existingLawyer) return res.status(400).json({ success:false, message: 'Advogado já cadastrado' });
     // verifica o telefone
     if(phoneNumber === '' || phoneNumber === undefined){
       phoneNumber= '00000000000';
@@ -19,7 +19,7 @@ router.post('/', async (req, res) => {
     const lawyer = new Lawyer({ name, role: 'Lawyer', oab, phoneNumber });
     await lawyer.save();
 
-    res.status(201).json({ message: 'Advogado criado com sucesso', lawyer });
+    res.status(201).json({ success:true, message: 'Advogado criado com sucesso', lawyer });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -89,5 +89,23 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+// Buscar um advogado pelo OAB
+router.get('/lawyer/:oab', async (req, res) => {
+  const { oab } = req.params;
+  try {
+    const lawyer = await Lawyer.findOne({ oab });
+
+    if (!lawyer) {
+      return res.status(200).json({success:false, message: 'Advogado não encontrado' });
+    }
+    res.status(200).json({success:true, lawyer });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
+
 
 export default router;

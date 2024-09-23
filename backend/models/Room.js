@@ -8,7 +8,7 @@ const roomSchema = new Schema({
     required: true,
     unique: true
   },
-  isOccupied: {
+  isAvailable: {
     type: Boolean,
     default: false
   },

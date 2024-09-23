@@ -14,7 +14,7 @@ router.get('/',authMiddleware, scheduleController.getAllSchedules);
 router.get('/:id',authMiddleware, scheduleController.getScheduleById);
 
 // Buscar agendamentos de um dia
-router.get('/schedules/day',authMiddleware, scheduleController.getSchedulesByDay);
+router.get('/schedules/day/:date/:hour',authMiddleware, scheduleController.getSchedulesByDayAndHour);
 
 // Confirmar um agendamento
 router.patch('/:id/confirm',authMiddleware, scheduleController.confirmSchedule);

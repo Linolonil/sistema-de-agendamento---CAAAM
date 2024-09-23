@@ -23,6 +23,7 @@ export const seedRooms = async () => {
   for (let i = 1; i <= 13; i++) {
     rooms.push({
       number: i,
+      isAvailable: false,
       hasAirConditioning: false,
       hasTV: false,
       capacity: 20,  // Exemplo de capacidade; ajuste conforme necessário

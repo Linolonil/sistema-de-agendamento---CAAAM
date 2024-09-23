@@ -47,7 +47,7 @@ router.get('/:id', async (req, res) => {
 // Atualizar as informações de uma sala
 router.put('/:id', async (req, res) => {
   try {
-    const { number, hasAirConditioning, hasTV, capacity } = req.body;
+    const { number, hasAirConditioning,isAvailable, hasTV, capacity } = req.body;
 
     // Buscar a sala pelo ID
     const room = await Room.findById(req.params.id);
@@ -55,6 +55,7 @@ router.put('/:id', async (req, res) => {
 
     // Atualizar os campos se houver mudanças
     room.number = number !== undefined ? number : room.number;
+    room.isAvailable = isAvailable !== undefined ? isAvailable : room.isAvailable;
     room.hasAirConditioning = hasAirConditioning !== undefined ? hasAirConditioning : room.hasAirConditioning;
     room.hasTV = hasTV !== undefined ? hasTV : room.hasTV;
     room.capacity = capacity !== undefined ? capacity : room.capacity;
@@ -91,5 +92,7 @@ router.delete('/', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+
 
 export default router;

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"; // Use useNavigate para redireci
 import { PropTypes } from 'prop-types';
 import api from './../../services/api';
 import { toast } from "react-toastify";
+import axios from "axios";
 
 export const AuthContext = createContext();
 
@@ -18,6 +19,8 @@ export const AuthProvider = ({ children }) => {
       if (token && storedUser) {
         setUser(JSON.parse(storedUser));
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
         navigate("/admin"); // Corrigido para redirecionar sem JSX
       }
     };

@@ -1,117 +1,92 @@
 import Schedule from "../models/Schedule.js";
 import User from "../models/User.js";
 import Lawyer from "../models/Lawyer.js";
-import { parseISO, getDay,startOfDay, endOfDay, isValid } from 'date-fns';
+import { parseISO, isWeekend,isBefore ,isValid, hoursToSeconds } from 'date-fns';
+import Room from "../models/Room.js";
 
+const checkConflictingSchedules = async (parsedDate, hour, duration, roomId) => {
+  const conflictingSchedules = [];
+  for (let i = 0; i < duration; i++) {
+    const scheduleTime = `${hour + i}:00`;
+    const conflictingSchedule = await Schedule.findOne({
+      date: parsedDate,
+      time: scheduleTime, 
+      roomId,
+    });
+    if (conflictingSchedule) {
+      conflictingSchedules.push(conflictingSchedule);
+    }
+  }
+  return conflictingSchedules;
+};
 
-// Criar um novo agendamento
 const createSchedule = async (req, res) => {
   try {
     const { roomId, lawyerId, userId, date, time, type } = req.body;
 
     const parsedDate = parseISO(date);
 
-    // Verificar se a data cai entre segunda e sexta-feira
-    const dayOfWeek = getDay(parsedDate);
-    if (dayOfWeek === 0 || dayOfWeek === 6) { // 0 é domingo, 6 é sábado
-      return res.status(400).json({
-        message: 'Agendamentos só podem ser feitos de segunda a sexta-feira.',
-      });
+    // Verificar a disponibilidade da sala
+    const room = await Room.findById(roomId);
+    if (!room || !room.isAvailable) {
+      return res.status(400).json({ message: 'A sala não está disponível para agendamento.' });
     }
 
-    // Definir a duração com base no tipo de agendamento
-    const duration = type === 'hearing' ? 3 : 1;
-
-    // Converter o horário de início para objeto Date
-    const timeParts = time.split(':');
-    const hour = parseInt(timeParts[0], 10);
-    const minute = parseInt(timeParts[1], 10);
-    const isFriday = dayOfWeek === 5; // Verificar se é sexta-feira
-
-    // Verificar se o horário é válido
-    if (minute !== 0 || hour < 8 || hour > (isFriday ? 17 : 18)) {
-      return res.status(400).json({
-        message: `Horário inválido. O horário deve ser inteiro e dentro do intervalo de ${isFriday ? '08:00 - 17:00' : '08:00 - 18:00'}.`,
-      });
+    // Verificar se o dia é válido
+    if (isWeekend(parsedDate)) {
+      return res.status(400).json({ message: 'Agendamentos só podem ser feitos de segunda a sexta-feira.' });
     }
 
-    // Calcular o horário de término
-    const endHour = hour + duration;
 
-    // Verificar se o horário de término é válido
-    if (endHour > (isFriday ? 17 : 18)) {
-      return res.status(400).json({
-        message: `A reunião/audiência ultrapassa o horário permitido de ${isFriday ? '17:00' : '18:00'}.`,
-      });
+
+    // Obtém o advogado e o usuário
+    const lawyer = await Lawyer.findById(lawyerId);
+    const user = await User.findById(userId);
+
+    if (!lawyer || !user) {
+      return res.status(404).json({ message: 'Usuário ou advogado não encontrado' });
     }
 
-    // Verificar se a sala está disponível durante o período
-    const conflictingSchedule = await Schedule.findOne({
-      roomId,
-      date,
-      $or: [
-        { time: { $gte: time, $lt: `${endHour}:00` } }, // Agendamento inicia durante o período
-        { endTime: { $gt: time, $lte: `${endHour}:00` } }, // Agendamento termina dentro do período
-        { time: { $lt: `${endHour}:00` }, endTime: { $gt: time } } // Agendamento se sobrepõe ao novo
-      ],
-    });
+    // Duração da audiência ou reunião
+    const duration = type === 'hearing' ? 3 : 1; // 3 horas para audiência, 1 hora para reunião
 
-    if (conflictingSchedule) {
-      return res.status(400).json({ message: 'Sala já está ocupada durante este horário' });
+    // converter hora em timestamp
+    const [hour, minute] = time.split(':').map(Number);
+    const startTime = new Date(parsedDate);
+    startTime.setHours(hour, minute, 0, 0);
+
+    // Verificar conflitos de agendamento
+    const conflictingSchedules = await checkConflictingSchedules(parsedDate, hour, duration, roomId);
+    
+    if (conflictingSchedules.length > 0) {
+      return res.status(400).json({ message: 'Um ou mais horários estão ocupados.' });
     }
 
-    // Verificar se o advogado existe
-    const lawyerExists = await Lawyer.findById(lawyerId);
-    if (!lawyerExists) return res.status(404).json({ message: 'Advogado não encontrado' });
-
-    // Verificar se o usuário existe
-    const userExists = await User.findById(userId);
-    if (!userExists) return res.status(404).json({ message: 'Usuário não encontrado' });
-
-    if (type === 'hearing') {
-      // Criar múltiplos agendamentos para audiências
-      const schedulesToSave = [];
-      for (let i = 0; i < 3; i++) {
-        const hearingTime = `${hour + i}:00`; // Horários escalonados
-        const hearingEndHour = hour + 3; // Termina em 3 horas
-
-        const schedule = new Schedule({
-          roomId,
-          userId,
-          lawyerId,
-          date,
-          time: hearingTime,
-          endTime: `${hearingEndHour}:00`, // Definindo o horário de término
-          type: 'hearing',
-        });
-
-        schedulesToSave.push(schedule);
-      }
-
-      // Salvar todos os agendamentos no banco
-      await Schedule.insertMany(schedulesToSave);
-    } else {
-      // Criar um novo agendamento se não for audiência
-      const schedule = new Schedule({
-        roomId,
+    // Salvar novos agendamentos
+    for (let i = 0; i < duration; i++) {
+      const scheduleTime = `${hour + i}:00`;
+      const scheduleData = {
+        date: parsedDate,
+        time: scheduleTime,
         userId,
         lawyerId,
-        date,
-        time,
-        endTime: `${endHour}:00`, // Definindo o horário de término
+        roomId,
         type,
-      });
+        duration,
+      };
 
-      await schedule.save();
+      const newSchedule = new Schedule(scheduleData);
+      await newSchedule.save();
     }
 
-    res.status(201).json({ message: 'Agendamento criado com sucesso' });
+    // Enviar a resposta de sucesso
+    res.status(201).json({ success: true ,message: type === 'hearing' ? 'Audiência criada com sucesso' : 'Reunião criada com sucesso' });
+    
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({success: false, message: error.message });
   }
 };
 
-// Listar todos os agendamentos
 const getAllSchedules = async (req, res) => {
   const user = req.user; 
   try {
@@ -163,61 +138,73 @@ const deleteSchedules = async (req, res) => {
 };
 
 // Buscar agendamentos de um dia
-const getSchedulesByDay = async (req, res) => {
+const getSchedulesByDayAndHour = async (req, res) => {
   try {
-    const { date } = req.query; // Obter a data da query param
-    console.log(date);
-    if (!date) {
-      return res.status(400).json({ message: 'Por favor, forneça uma data válida.' });
+    const { date, hour } = req.params; // Obter data e hora da query param
+    if (!date || !hour) {
+      return res.status(400).json({ message: 'Por favor, forneça uma data e uma hora válidas.' });
     }
 
     const parsedDate = parseISO(date);
-    
     // Verificar se a data é válida
     if (!isValid(parsedDate)) {
       return res.status(400).json({ message: 'Data inválida. Use o formato YYYY-MM-DD.' });
     }
 
-    // Obter o início e fim do dia para a data fornecida
-    const start = startOfDay(new Date(date));
-    const end = endOfDay(new Date(date));
-        
-    // Buscar agendamentos entre o início e fim do dia
+    // Buscar agendamentos para a data e hora especificadas
     const schedules = await Schedule.find({
-      date: {
-        $gte: start,
-        $lt: end,
-      },
+      date: parsedDate,
+      time: hour,
     })
-    .populate("roomId")
-    .populate("lawyerId")
-    .populate("userId");
-
-
-    if (!schedules) {
-      return res.status(404).json({
-        message: 'Nenhum agendamento encontrado para essa data.',
-        availableRooms: [], // Aqui você pode adicionar lógica para retornar as salas disponíveis, se necessário
+      .populate({
+        path: 'roomId',
+        select: 'number', 
+      })
+      .populate({
+        path: 'lawyerId',
+        select: 'name oab phone',
+      })
+      .populate({
+        path: 'userId',
+        select: 'name',
       });
-    }
-    
-    res.status(200).json(schedules);
+
+    // Obter IDs das salas ocupadas
+    const occupiedRoomNumbers = schedules.map(schedule => schedule.roomId.number);
+
+    // Obter todas as salas
+    const rooms = await Room.find();
+
+    // Comparar as salas e retornar os números que não estão ocupados
+    const desocupiedRoomNumbers = rooms
+  .filter(room => room.isAvailable && !occupiedRoomNumbers.includes(room.number))
+  .map(room => ({ _id: room._id, number: room.number }));
+
+
+    // Retornar os agendamentos encontrados e as salas ocupadas e desocupadas
+    res.status(200).json({
+      schedules,
+      occupiedRoomNumbers,
+      desocupiedRoomNumbers,
+    });
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
+
 // Confirmar um agendamento
 const confirmSchedule = async (req, res) => {
   try {
     const { id } = req.params;
-    const { isConfirmed } = req.body;
 
     const schedule = await Schedule.findById(id);
     if (!schedule)
       return res.status(404).json({ message: "Agendamento não encontrado" });
 
-    schedule.confirmed = isConfirmed;
+
+    schedule.confirmed === true ? schedule.confirmed = false : schedule.confirmed = true;
     await schedule.save();
 
     res
@@ -231,7 +218,7 @@ const confirmSchedule = async (req, res) => {
 export default {
   createSchedule,
   getAllSchedules,
-  getSchedulesByDay,
+  getSchedulesByDayAndHour,
   deleteAllSchedules,
   deleteSchedules,
   getScheduleById,
