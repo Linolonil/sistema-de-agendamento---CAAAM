@@ -78,6 +78,16 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// Excluir todos os advogados
+router.delete('/', async (req, res) => {
+  try {
+    await Lawyer.deleteMany({});
+    res.status(200).json({ message: 'Todos os advogados foram excluídos com sucesso' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Buscar um advogado pelo ID
 router.get('/:id', async (req, res) => {
   try {

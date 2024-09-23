@@ -5,8 +5,8 @@ import { PropTypes } from 'prop-types';
 
 const TABLE_HEAD = ["Sala", "Nome do Advogado", "OAB", "Tipo de Agendamento"];
 
-function Rooms({ onSelectRoom }) {
-  const { schedules, availableRooms, confirmSchedule, loading, error } = useContext(ScheduleContext);
+function Rooms() {
+  const { schedules, availableRooms, confirmSchedule, loading, error, setRoomId } = useContext(ScheduleContext);
   const [selectedRoomId, setSelectedRoomId] = useState(null); // Estado para a sala selecionada
 
   // Unir e ordenar as salas ocupadas e disponíveis
@@ -37,7 +37,7 @@ function Rooms({ onSelectRoom }) {
 
   const handleRoomSelect = (roomId) => {
     setSelectedRoomId(roomId);
-    onSelectRoom(roomId); // Passa o ID da sala selecionada corretamente
+    setRoomId(roomId); // Passa o ID da sala selecionada corretamente
   };
 
   const renderRooms = () => {

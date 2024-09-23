@@ -20,15 +20,33 @@ export const ScheduleProvider = ({ children }) => {
   const [occupiedRooms, setOccupiedRooms] = useState([]);
   const [availableRooms, setAvailableRooms] = useState([]);
   const [schedules, setSchedules] = useState([]);
+  // estado para sala de agendamento
+  const [oab, setOab] = useState("");
+  const [horario, setHorario] = useState("8:00");
+  const [date, setDate] = useState(new Date());
+  const [roomId, setRoomId] = useState(null);
+  const [lawyer, setLawyer] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [tipoAgendamento, setTipoAgendamento] = useState("meeting");
+  
+  // estados de erro e carregamento
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  
+  console.log({roomId, lawyer, userId, date, horario, tipoAgendamento})
   // Estado para armazenar data e hora
   const [selectedDate, setSelectedDate] = useState(getCurrentDateAndHour().date);
   const [selectedHour, setSelectedHour] = useState(getCurrentDateAndHour().hour);
   // Função para buscar os agendamentos com base na data e hora
-  
+  useEffect(() => {
+    const storedUser = localStorage.getItem("@Auth:user");
+    if (storedUser) {
+      setUserId(JSON.parse(storedUser)._id);
+    }
+  },[])
+
   const fetchSchedulesAndRooms = async (date, hour) => {
+    console.log(date, hour)
     setLoading(true);
     try {
       const response = await api.get(`api/v1/schedules/schedules/day/${date}/${hour}`);
@@ -64,7 +82,6 @@ export const ScheduleProvider = ({ children }) => {
   const createLawyer = async (name, oab, phoneNumber) => {
     try {
       const response = await api.post(`/api/v1/lawyer`, { name, oab, phoneNumber });
-      console.log(response)
       return response.data;
     } catch (error) {
       console.log(error);
@@ -72,35 +89,42 @@ export const ScheduleProvider = ({ children }) => {
     }
   };
   // cria novo agendamento
-  const createSchedule = async (date, hour, roomId, lawyerId, userId, type) => {
+  const createSchedule = async ({ date, hour, roomId, lawyerId, userId, type }) => {
     try {
-      const response = await api.post(`api/v1/schedules`, {
-        roomId,
-        lawyerId,
-        userId,
-        date,
-        time:hour,
-        type
-      });
-      if (response.status === 201) {
-        toast.success("Agendamento criado com sucesso!");
-        fetchSchedulesAndRooms(selectedDate, selectedHour);
-      } else {
-        toast.error("Erro ao criar agendamento!");
-      }
+        const response = await api.post(`api/v1/schedules`, {
+            roomId,
+            lawyerId,
+            userId,
+            date,
+            time: hour,
+            type,
+        });
+
+        // Verifica se a resposta contém a propriedade 'success' e se é true
+        if (response.data.success) {
+            toast.success("Agendamento criado com sucesso!");
+            setLawyer(null)
+            setOab(null)
+            setRoomId(null)
+            await fetchSchedulesAndRooms(selectedDate, selectedHour);
+            return;
+        } else {
+            toast.error("Erro ao criar agendamento!");
+            return;
+        }
     } catch (error) {
-      console.log(error);
-      toast.error("Erro ao criar agendamento!");
-      return error.response.data;
+        console.log(error);
+        const errorMessage = error.response?.data?.message || "Erro ao criar agendamento!";
+        toast.error(errorMessage);
+        return error.response?.data; // Retorna os dados de erro se disponíveis
     }
-  };
+};
 
   // Função para o usuário atualizar a data e hora
   const updateDateAndHour = (newDate, newHour) => {
     setSelectedDate(newDate);
     setSelectedHour(newHour);
   };
-
   // Função para confirmar um agendamento
   const confirmSchedule = async (scheduleId) => {
     if(!scheduleId || scheduleId === undefined) return toast.info("Sala disponível!");
@@ -118,7 +142,23 @@ export const ScheduleProvider = ({ children }) => {
       toast.error("Erro ao confirmar agendamento!");
     }
   }
+
+  // valores do contexto
   const value = {
+    lawyer,
+    roomId,
+    userId,
+    date,
+    oab,
+    setOab,
+    horario,
+    setRoomId,
+    setLawyer,
+    setUserId,
+    setDate,
+    setHorario,
+    setTipoAgendamento,
+    tipoAgendamento,
     occupiedRooms,
     availableRooms,
     createSchedule,
