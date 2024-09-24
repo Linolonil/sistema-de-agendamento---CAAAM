@@ -47,6 +47,7 @@ export const ScheduleProvider = ({ children }) => {
     }
   },[])
 
+  // busca agendamentos e salas ocupadas
   const fetchSchedulesAndRooms = async (date, hour) => {
     const token = localStorage.getItem("@Auth:token");
     setLoading(true);
@@ -57,6 +58,8 @@ export const ScheduleProvider = ({ children }) => {
         }
       });
       const { schedules, desocupiedRoomNumbers, occupiedRoomNumbers } = response.data;
+      console.log(response.data)
+  
       setSchedules(schedules);
       setAvailableRooms(desocupiedRoomNumbers);
       setOccupiedRooms(occupiedRoomNumbers);
@@ -107,6 +110,7 @@ export const ScheduleProvider = ({ children }) => {
 
         // Verifica se a resposta contém a propriedade 'success' e se é true
         if (response.data.success) {
+          toast.dismiss(); // Dismiss any existing toasts
             toast.success("Agendamento criado com sucesso!");
             setLawyer(null)
             setOab(null)
@@ -114,12 +118,14 @@ export const ScheduleProvider = ({ children }) => {
             await fetchSchedulesAndRooms(selectedDate, selectedHour);
             return;
         } else {
+          toast.dismiss(); // Dismiss any existing toasts
             toast.error("Erro ao criar agendamento!");
             return;
         }
     } catch (error) {
         console.log(error);
         const errorMessage = error.response?.data?.message || "Erro ao criar agendamento!";
+        toast.dismiss(); // Dismiss any existing toasts
         toast.error(errorMessage);
         return error.response?.data; // Retorna os dados de erro se disponíveis
     }
@@ -147,6 +153,27 @@ export const ScheduleProvider = ({ children }) => {
       toast.error("Erro ao confirmar agendamento!");
     }
   }
+
+  // função pra mudar o estado da sala, se tem ar, tv
+  const changeRoomState = async (roomId, hasAirConditioning, hasTV, hasComputer) => {
+    try {
+      const response = await api.put(`http://localhost:5000/api/v1/room/${roomId}`, {
+        hasAirConditioning,
+        hasTV,
+        hasComputer,
+      });
+      if (response.status !== 200) {
+        toast.error('Erro ao atualizar a sala!');    
+        return;
+      }
+      fetchSchedulesAndRooms(selectedDate, selectedHour);
+      toast.dismiss(); // Dismiss any existing toasts
+      toast.success('Sala atualizada com sucesso!');
+    } catch (error) {
+      console.log(error)
+      toast.error('Erro ao atualizar a sala!');
+    }
+  };
 
   // exclui um agendamento
   const deleteSchedule = async (scheduleId) => {
@@ -182,6 +209,7 @@ export const ScheduleProvider = ({ children }) => {
     setHorario,
     setTipoAgendamento,
     tipoAgendamento,
+    changeRoomState,
     occupiedRooms,
     availableRooms,
     createSchedule,

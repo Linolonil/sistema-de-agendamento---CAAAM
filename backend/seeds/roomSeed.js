@@ -26,7 +26,7 @@ export const seedRooms = async () => {
       isAvailable: false,
       hasAirConditioning: false,
       hasTV: false,
-      capacity: 20,  // Exemplo de capacidade; ajuste conforme necessário
+      capacity: 4,  // Exemplo de capacidade; ajuste conforme necessário
     });
   }
 

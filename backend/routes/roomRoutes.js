@@ -47,7 +47,7 @@ router.get('/:id', async (req, res) => {
 // Atualizar as informações de uma sala
 router.put('/:id', async (req, res) => {
   try {
-    const { number, hasAirConditioning,isAvailable, hasTV, capacity } = req.body;
+    const { number, hasAirConditioning,isAvailable, hasTV, hasComputer,  capacity } = req.body;
 
     // Buscar a sala pelo ID
     const room = await Room.findById(req.params.id);
@@ -58,6 +58,7 @@ router.put('/:id', async (req, res) => {
     room.isAvailable = isAvailable !== undefined ? isAvailable : room.isAvailable;
     room.hasAirConditioning = hasAirConditioning !== undefined ? hasAirConditioning : room.hasAirConditioning;
     room.hasTV = hasTV !== undefined ? hasTV : room.hasTV;
+    room.hasComputer = hasComputer !== undefined ? hasComputer : room.hasComputer;
     room.capacity = capacity !== undefined ? capacity : room.capacity;
 
     await room.save();

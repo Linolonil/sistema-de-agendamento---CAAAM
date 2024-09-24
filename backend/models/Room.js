@@ -20,6 +20,10 @@ const roomSchema = new Schema({
     type: Boolean,
     default: false,  // Indica se a sala tem TV
   },
+  hasComputer: {
+    type: Boolean,
+    default: true,  // Indica se a sala tem Computador
+  },
   capacity: {
     type: Number,
     required: true,  // Quantas pessoas a sala suporta

@@ -160,7 +160,7 @@ const Admin = () => {
         </ListItem>
       </List>
     </Card>
-    <Card className="h-[calc(100vh-2rem)] w-3/4 mx-auto p-2 shadow-md" color="gray">
+    <Card className="h-[calc(100vh-2rem)] w-3/4 mx-auto " color="gray">
     {activeSection === "profile" && <Profile user={user}/>}
     {activeSection === "create-schedule" && <CreateSchedules />}
     {/* {activeSection === "view-schedules" && <ViewSchedules />} */}

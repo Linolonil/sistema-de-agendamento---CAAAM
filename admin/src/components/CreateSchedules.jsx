@@ -13,7 +13,7 @@ const SchedulingPage = () => {
 
     
   return (
-    <Card className=" w-full h-full mx-auto flex justify-center items-center flex-row  gap-1  bg-dark ">
+    <Card className=" w-full h-full mx-auto flex justify-center items-center flex-row    bg-dark ">
       <div className="w-full lg:w-2/3">
         <Rooms/>
       </div>

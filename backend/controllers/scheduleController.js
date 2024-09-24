@@ -158,7 +158,7 @@ const getSchedulesByDayAndHour = async (req, res) => {
     })
       .populate({
         path: 'roomId',
-        select: 'number', 
+        select: 'number hasAirConditioning hasTV hasComputer capacity',
       })
       .populate({
         path: 'lawyerId',
@@ -172,14 +172,20 @@ const getSchedulesByDayAndHour = async (req, res) => {
     // Obter IDs das salas ocupadas
     const occupiedRoomNumbers = schedules.map(schedule => schedule.roomId.number);
 
-    // Obter todas as salas
-    const rooms = await Room.find();
+    // Obter todas as salas disponíveis
+    const rooms = await Room.find({ isAvailable: true });
 
     // Comparar as salas e retornar os números que não estão ocupados
     const desocupiedRoomNumbers = rooms
-  .filter(room => room.isAvailable && !occupiedRoomNumbers.includes(room.number))
-  .map(room => ({ _id: room._id, number: room.number }));
-
+      .filter(room => !occupiedRoomNumbers.includes(room.number))
+      .map(room => ({
+        _id: room._id,
+        number: room.number,
+        hasAirConditioning: room.hasAirConditioning,
+        hasComputer: room.hasComputer,
+        hasTV: room.hasTV,
+        capacity: room.capacity,
+      }));
 
     // Retornar os agendamentos encontrados e as salas ocupadas e desocupadas
     res.status(200).json({
@@ -192,6 +198,7 @@ const getSchedulesByDayAndHour = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 
 // Confirmar um agendamento
