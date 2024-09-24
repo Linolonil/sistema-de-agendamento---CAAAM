@@ -20,6 +20,7 @@ export const ScheduleProvider = ({ children }) => {
   const [occupiedRooms, setOccupiedRooms] = useState([]);
   const [availableRooms, setAvailableRooms] = useState([]);
   const [schedules, setSchedules] = useState([]);
+  
   // estado para sala de agendamento
   const [oab, setOab] = useState("");
   const [horario, setHorario] = useState("8:00");
@@ -33,23 +34,28 @@ export const ScheduleProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  console.log({roomId, lawyer, userId, date, horario, tipoAgendamento})
   // Estado para armazenar data e hora
   const [selectedDate, setSelectedDate] = useState(getCurrentDateAndHour().date);
   const [selectedHour, setSelectedHour] = useState(getCurrentDateAndHour().hour);
-  // Função para buscar os agendamentos com base na data e hora
+
+
+  // Função para buscar user no localstorage
   useEffect(() => {
-    const storedUser = localStorage.getItem("@Auth:user");
-    if (storedUser) {
-      setUserId(JSON.parse(storedUser)._id);
+    const storedUser = localStorage.getItem("@Auth:user"); 
+       if (storedUser ) {
+      setUserId(JSON.parse(storedUser)._id)
     }
   },[])
 
   const fetchSchedulesAndRooms = async (date, hour) => {
-    console.log(date, hour)
+    const token = localStorage.getItem("@Auth:token");
     setLoading(true);
     try {
-      const response = await api.get(`api/v1/schedules/schedules/day/${date}/${hour}`);
+       const response = await api.get(`api/v1/schedules/schedules/day/${date }/${hour}`,{
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const { schedules, desocupiedRoomNumbers, occupiedRoomNumbers } = response.data;
       setSchedules(schedules);
       setAvailableRooms(desocupiedRoomNumbers);
@@ -62,7 +68,6 @@ export const ScheduleProvider = ({ children }) => {
       setLoading(false);
     }
   };
-
   // useEffect inicial para buscar com a data e hora atuais
   useEffect(() => {
     fetchSchedulesAndRooms(selectedDate, selectedHour);
@@ -143,6 +148,23 @@ export const ScheduleProvider = ({ children }) => {
     }
   }
 
+  // exclui um agendamento
+  const deleteSchedule = async (scheduleId) => {
+    try {
+      const response = await api.delete(`api/v1/schedules/delete/${scheduleId}`);
+      if (response.status === 200) {
+        toast.success(response.data.message);
+        fetchSchedulesAndRooms(selectedDate, selectedHour);
+      } else {
+        toast.error("Erro ao excluir agendamento!");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Erro ao excluir agendamento!");
+    }
+  }             
+
+
   // valores do contexto
   const value = {
     lawyer,
@@ -152,6 +174,7 @@ export const ScheduleProvider = ({ children }) => {
     oab,
     setOab,
     horario,
+    deleteSchedule,
     setRoomId,
     setLawyer,
     setUserId,

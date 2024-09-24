@@ -2,97 +2,118 @@ import { useState, useContext } from "react";
 import { toast } from "react-toastify";
 import { Card, Input, Button, Typography } from "@material-tailwind/react";
 import ScheduleContext from "../context/SchedulesContext";
-import { PropTypes } from 'prop-types';
+import { PropTypes } from "prop-types";
 
 const CreateLawyerForm = ({ handleCreateUser }) => {
-  const [lawyerName, setLawyerName] = useState("");
-  const [telefone, setTelefone] = useState("");
-  const { createLawyer, setLawyer, oab, setOab } = useContext(ScheduleContext);
+  const [lawyerData, setLawyerData] = useState({
+    name: "",
+    oab: "",
+    phoneNumber: "",
+  });
+  const { createLawyer, setLawyer } = useContext(ScheduleContext);
 
-  const handleCreateUserLawyer = () => {
-    handleCreateUser()
+  // Atualiza os valores do formulário
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setLawyerData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
+  // Lida com o envio do formulário
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const { name, oab, phoneNumber } = lawyerData;
+
+    // Verifica se todos os campos foram preenchidos
+    if (!name || !oab || !phoneNumber) {
+      toast.error("Preencha todos os campos!");
+      return;
+    }
+
     try {
-      const newLawyer = { name: lawyerName, oab, phoneNumber: telefone };
-      const response = await createLawyer(newLawyer.name, newLawyer.oab, newLawyer.phoneNumber);
+      const response = await createLawyer(name, oab, phoneNumber);
       if (response.success) {
-          setLawyer(response.lawyer._id);
-          toast.success("Advogado cadastrado com sucesso!");
-          handleCreateUserLawyer();
-        return
+        setLawyer(response.lawyer._id);
+        toast.success("Advogado cadastrado com sucesso!");
+        handleCreateUser(); // Chama a função após o sucesso
       } else {
         toast.error("Advogado já cadastrado!");
-        handleCreateUserLawyer();
-        return
       }
     } catch (error) {
-      console.log(error)
+      console.error("Erro ao cadastrar advogado:", error);
       toast.error("Erro ao cadastrar advogado!");
-      return    
     }
   };
 
   return (
-    <Card color="transparent" shadow={false} className="p-6 w-full">
-      <Typography variant="h4" color="blue-gray" className="text-center mb-6">
+    <Card color="transparent" shadow={false} className="p-5 w-full text-white rounded-lg">
+      <Typography variant="h4" className="text-center mb-6 text-white">
         Cadastrar Advogado
       </Typography>
+
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <Typography variant="h6" color="blue-gray">Nome do Advogado</Typography>
+          <Typography variant="h6" className="text-white">Nome do Advogado</Typography>
           <Input
             type="text"
             size="lg"
-            value={lawyerName}
-            onChange={(e) => setLawyerName(e.target.value)}
+            name="name"
+            value={lawyerData.name}
+            onChange={handleChange}
             placeholder="Nome do Advogado"
             required
-            className="mt-2"
+            className="mt-2 bg-gray-700 border border-gray-600 text-white"
           />
         </div>
 
         <div className="mb-4">
-          <Typography variant="h6" color="blue-gray">OAB</Typography>
+          <Typography variant="h6" className="text-white">OAB</Typography>
           <Input
             type="text"
             size="lg"
-            value={oab}
-            onChange={(e) => setOab(e.target.value)}
+            name="oab"
+            value={lawyerData.oab}
+            onChange={handleChange}
             placeholder="Informe a OAB"
             required
-            className="mt-2"
+            className="mt-2 bg-gray-700 border border-gray-600 text-white"
           />
         </div>
 
         <div className="mb-4">
-          <Typography variant="h6" color="blue-gray">Telefone</Typography>
+          <Typography variant="h6" className="text-white">Telefone</Typography>
           <Input
             type="tel"
             size="lg"
-            value={telefone}
-            onChange={(e) => setTelefone(e.target.value)}
+            name="phoneNumber"
+            value={lawyerData.phoneNumber}
+            onChange={handleChange}
             placeholder="Informe o telefone"
             required
-            className="mt-2"
+            className="mt-2 bg-gray-700 border border-gray-600 text-white"
           />
         </div>
 
-        <Button type="submit" color="green" className="mt-6 w-full">
+        <Button type="submit" color="green" className="mt-6 w-full bg-green-600 hover:bg-green-700">
           Cadastrar Advogado
         </Button>
       </form>
-      <Typography onClick={handleCreateUserLawyer} className="text-center mt-6 text-blue-500 cursor-pointer">
-       Criar agendamento
+
+      <Typography
+        onClick={handleCreateUser}
+        className="text-center mt-6 text-white cursor-pointer hover:underline"
+      >
+        Criar agendamento
       </Typography>
     </Card>
   );
 };
+
+// Define os tipos de props esperados
 CreateLawyerForm.propTypes = {
-  onLawyerCreated: PropTypes.func.isRequired,
   handleCreateUser: PropTypes.func.isRequired,
-};  
+};
 
 export default CreateLawyerForm;

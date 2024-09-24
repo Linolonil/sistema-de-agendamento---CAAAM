@@ -1,12 +1,12 @@
 import { useContext, useState } from "react";
 import { Button, Card, Typography } from "@material-tailwind/react";
 import { ScheduleContext } from "./../context/SchedulesContext";
-import { PropTypes } from 'prop-types';
+import { TrashIcon } from "lucide-react";
 
-const TABLE_HEAD = ["Sala", "Nome do Advogado", "OAB", "Tipo de Agendamento"];
+const TABLE_HEAD = ["Sala", "Ocupante", "OAB", "Tipo", "Excluir"];
 
 function Rooms() {
-  const { schedules, availableRooms, confirmSchedule, loading, error, setRoomId } = useContext(ScheduleContext);
+  const { schedules, availableRooms, confirmSchedule, loading, error, setRoomId, deleteSchedule } = useContext(ScheduleContext);
   const [selectedRoomId, setSelectedRoomId] = useState(null); // Estado para a sala selecionada
 
   // Unir e ordenar as salas ocupadas e disponíveis
@@ -20,9 +20,9 @@ function Rooms() {
       eventType: schedule.type === "meeting" ? "Reunião" : "Audiência",
       isOccupied: true,
     })),
-    ...availableRooms.map((room) => ({ // Alteração aqui
-      roomId: room._id, // Aqui estamos acessando o _id do objeto
-      roomNumber: room.number, // Aqui estamos acessando o number do objeto
+    ...availableRooms.map((room) => ({
+      roomId: room._id,
+      roomNumber: room.number,
       lawyerName: null,
       oab: null,
       confirmed: false,
@@ -45,13 +45,13 @@ function Rooms() {
       <tr
         key={room.roomId}
         onClick={() => handleRoomSelect(room.roomId)}
-        className={`hover:bg-green-100 ${selectedRoomId === room.roomId ? "bg-green-200" : ""}`}
+        className={`cursor-pointer transition-colors duration-300 hover:bg-gray-200  ${selectedRoomId === room.roomId ? "bg-green-200 border" : ""}`}
       >
-        <td className="border-b border-blue-gray-100 p-3 text-center">
+        <td className="border-b border-blue-gray-100 p-2 text-center">
           <Button
-            className={`border rounded-[50px] p-1 w-full ${room.confirmed ? "bg-blue-500" : "bg-gray-600 text-white"}`}
+            className={`flex justify-center items-center rounded-full w-10 h-10 border text-black text-xl font-bold text-center ${room.confirmed ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-500 hover:bg-gray-600"}`}
             onClick={(e) => {
-              e.stopPropagation(); // Impede a seleção da linha ao clicar no botão
+              e.stopPropagation();
               handleConfirm(room.roomId);
             }}
           >
@@ -59,19 +59,27 @@ function Rooms() {
           </Button>
         </td>
         <td className="border-b border-blue-gray-100 p-3 text-center">
-          <p className="font-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-[140px]">
-            {room.isOccupied ? room.lawyerName : "Sala disponível"}
+          <p 
+            className="font-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-[140px]" 
+            title={room.isOccupied ? room.lawyerName : ""}
+          >
+            {room.isOccupied ? room.lawyerName : ""}
           </p>
         </td>
         <td className="border-b border-blue-gray-100 p-3 text-center">
-          <p className="font-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-[60px]">
+          <p className="font-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-[60px] text-center">
             {room.isOccupied ? room.oab : ""}
           </p>
         </td>
         <td className="border-b border-blue-gray-100 p-3 text-center">
-          <p className={`rounded w-2/3 text-white  ${room.eventType === "Reunião" ? "bg-blue-500" : room.eventType === "Audiência" ? "bg-red-600" : "text-gray-500"}`}>
-            {room.eventType}
+          <p className={`rounded-full p-1 text-white ${room.eventType === "Reunião" ? "bg-blue-500" : room.eventType === "Audiência" ? "bg-red-600" : "text-gray-500"}`}>
+            {room.eventType || ""}
           </p>
+        </td>
+        <td className="border-b border-blue-gray-100 text-center">
+          <Button onClick={ () => deleteSchedule(room.roomId)}>
+            <TrashIcon className="size-4 text-red-300 " />
+          </Button>
         </td>
       </tr>
     ));
@@ -81,8 +89,8 @@ function Rooms() {
   if (error) return <Typography color="red">{error}</Typography>;
 
   return (
-    <Card className="h-full w-full">
-      <table className="w-full min-w-max table-auto text-left">
+    <Card className="h-full w-full overflow-auto">
+      <table className="w-full overflow-hidden h-full table-auto text-left">
         <thead>
           <tr>
             {TABLE_HEAD.map((head) => (
@@ -101,9 +109,5 @@ function Rooms() {
     </Card>
   );
 }
-
-Rooms.propTypes = {
-  onSelectRoom: PropTypes.func.isRequired,
-};
 
 export default Rooms;

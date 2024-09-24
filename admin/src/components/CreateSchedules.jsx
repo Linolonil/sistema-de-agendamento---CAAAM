@@ -3,7 +3,6 @@ import { Card } from "@material-tailwind/react";
 import Rooms from "./Rooms";
 import CreateScheduleForm from "./CreateScheduleForm";
 import CreateLawyerForm from "./CreateLawyerForm";
-import VerifyLawyerExist from "./verifyLawyerExist";
 
 const SchedulingPage = () => {
     const [create, setCreate] = useState(false);
@@ -14,16 +13,13 @@ const SchedulingPage = () => {
 
     
   return (
-    <Card className="p-6 w-full h-full mx-auto flex flex-wrap border gap-6">
-      <div className="w-full lg:w-1/2">
+    <Card className=" w-full h-full mx-auto flex justify-center items-center flex-row  gap-1  bg-dark ">
+      <div className="w-full lg:w-2/3">
         <Rooms/>
       </div>
-      <div className="w-full lg:w-1/2">
+      <div className="w-full lg:w-1/3">
       {!create ? (
-        <>
-        <VerifyLawyerExist />
         <CreateScheduleForm handleCreateUser={handleCreateUser}  />
-        </>
       ) : (
         <CreateLawyerForm handleCreateUser={handleCreateUser} />
       )}   
