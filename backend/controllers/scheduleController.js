@@ -1,7 +1,7 @@
 import Schedule from "../models/Schedule.js";
 import User from "../models/User.js";
 import Lawyer from "../models/Lawyer.js";
-import { parseISO, isWeekend,isBefore ,isValid, hoursToSeconds } from 'date-fns';
+import { parseISO, isWeekend,isValid, startOfDay, endOfDay  } from 'date-fns';
 import Room from "../models/Room.js";
 
 const checkConflictingSchedules = async (parsedDate, hour, duration, roomId) => {
@@ -87,14 +87,69 @@ const createSchedule = async (req, res) => {
   }
 };
 
+function getNextTwoHours(startTime) {
+  const timeBlocks = ['08:00','09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+  const startIndex = timeBlocks.indexOf(startTime);
+  return timeBlocks.slice(startIndex + 1, startIndex + 3); // Retorna os próximos dois horários
+}
+
 const getAllSchedules = async (req, res) => {
-  const user = req.user; 
+  const { date, time } = req.params; // Obter data e hora da query param
+
+  if (!date || !time) {
+    return res.status(400).json({ message: 'Por favor, forneça uma data e hora válidas!' });
+  }
+
+  const parsedDate = parseISO(date);
+  // Verificar se a data é válida
+  if (!isValid(parsedDate)) {
+    return res.status(400).json({ message: 'Data inválida. Use o formato YYYY-MM-DD.' });
+  }
+
   try {
-    const schedules = await Schedule.find()
-      .populate("roomId")
-      .populate("lawyerId")
-      .populate("userId");
-    res.status(200).json(schedules);
+    // Buscar todos os agendamentos para o dia inteiro
+    const schedules = await Schedule.find({
+      date: {
+        $gte: startOfDay(parsedDate),
+        $lt: endOfDay(parsedDate),
+      },
+    }).populate("roomId");
+
+    // Obter IDs das salas ocupadas para cada horário
+    const occupiedRoomsByHour = {};
+    schedules.forEach(schedule => {
+      const hour = schedule.time; // hora do agendamento (assumindo que `time` é a hora do agendamento)
+      if (!occupiedRoomsByHour[hour]) {
+        occupiedRoomsByHour[hour] = [];
+      }
+      occupiedRoomsByHour[hour].push(schedule.roomId.number);
+    });
+
+    // Obter todas as salas
+    const allRooms = await Room.find({ isAvailable: true });
+
+    // Listar as salas ocupadas
+    const occupiedRooms = schedules.map(schedule => schedule.roomId.number);
+
+    // Criar um array com os horários consecutivos a partir da hora fornecida
+    const startTime = time; // Exemplo: '09:00'
+    const nextTwoHours = getNextTwoHours(startTime); // Função que retorna os próximos dois horários consecutivos, como ['10:00', '11:00']
+
+    // Identificar salas disponíveis para 3 horas consecutivas (para audiências)
+    const freeRoomsForAudience = allRooms.filter(room => {
+      const roomNumber = room.number;
+      // Checar se a sala está disponível nos 3 horários consecutivos (inicial e os próximos 2)
+      const isAvailableForThreeHours = [startTime, ...nextTwoHours].every(hour => {
+        return !occupiedRoomsByHour[hour] || !occupiedRoomsByHour[hour].includes(roomNumber);
+      });
+      return isAvailableForThreeHours;
+    });
+
+    // Retornar as informações das salas ocupadas e livres para audiência
+    res.status(200).json({
+      freeRoomsForAudience
+    });
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -140,8 +195,8 @@ const deleteSchedules = async (req, res) => {
 // Buscar agendamentos de um dia
 const getSchedulesByDayAndHour = async (req, res) => {
   try {
-    const { date, hour } = req.params; // Obter data e hora da query param
-    if (!date || !hour) {
+    const { date } = req.params; // Obter data e hora da query param
+    if (!date) {
       return res.status(400).json({ message: 'Por favor, forneça uma data e uma hora válidas.' });
     }
 
@@ -154,11 +209,10 @@ const getSchedulesByDayAndHour = async (req, res) => {
     // Buscar agendamentos para a data e hora especificadas
     const schedules = await Schedule.find({
       date: parsedDate,
-      time: hour,
     })
       .populate({
         path: 'roomId',
-        select: 'number hasAirConditioning hasTV hasComputer capacity',
+        select: 'number',
       })
       .populate({
         path: 'lawyerId',
@@ -169,29 +223,8 @@ const getSchedulesByDayAndHour = async (req, res) => {
         select: 'name',
       });
 
-    // Obter IDs das salas ocupadas
-    const occupiedRoomNumbers = schedules.map(schedule => schedule.roomId.number);
-
-    // Obter todas as salas disponíveis
-    const rooms = await Room.find({ isAvailable: true });
-
-    // Comparar as salas e retornar os números que não estão ocupados
-    const desocupiedRoomNumbers = rooms
-      .filter(room => !occupiedRoomNumbers.includes(room.number))
-      .map(room => ({
-        _id: room._id,
-        number: room.number,
-        hasAirConditioning: room.hasAirConditioning,
-        hasComputer: room.hasComputer,
-        hasTV: room.hasTV,
-        capacity: room.capacity,
-      }));
-
-    // Retornar os agendamentos encontrados e as salas ocupadas e desocupadas
     res.status(200).json({
       schedules,
-      occupiedRoomNumbers,
-      desocupiedRoomNumbers,
     });
 
   } catch (error) {

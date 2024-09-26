@@ -1,6 +1,6 @@
 import { useState, useContext } from "react";
 import { toast } from "react-toastify";
-import { Card, Input, Button, Typography } from "@material-tailwind/react";
+import { Input, Button, Typography } from "@material-tailwind/react";
 import ScheduleContext from "../context/SchedulesContext";
 import { PropTypes } from "prop-types";
 
@@ -48,14 +48,9 @@ const CreateLawyerForm = ({ handleCreateUser }) => {
   };
 
   return (
-    <Card color="transparent" shadow={false} className="p-5 w-full text-white rounded-lg">
-      <Typography variant="h4" className="text-center mb-6 text-white">
-        Cadastrar Advogado
-      </Typography>
-
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="p-1 mt-3">
         <div className="mb-4">
-          <Typography variant="h6" className="text-white">Nome do Advogado</Typography>
+          <Typography variant="h6" className="text-black">Nome do Advogado</Typography>
           <Input
             type="text"
             size="lg"
@@ -64,12 +59,12 @@ const CreateLawyerForm = ({ handleCreateUser }) => {
             onChange={handleChange}
             placeholder="Nome do Advogado"
             required
-            className="mt-2 bg-gray-700 border border-gray-600 text-white"
+            className="mt-2 bg-gray-700 border border-gray-600 text-black"
           />
         </div>
 
         <div className="mb-4">
-          <Typography variant="h6" className="text-white">OAB</Typography>
+          <Typography variant="h6" className="text-black">OAB</Typography>
           <Input
             type="text"
             size="lg"
@@ -78,12 +73,12 @@ const CreateLawyerForm = ({ handleCreateUser }) => {
             onChange={handleChange}
             placeholder="Informe a OAB"
             required
-            className="mt-2 bg-gray-700 border border-gray-600 text-white"
+            className="mt-2 bg-gray-700 border border-gray-600 text-black"
           />
         </div>
 
         <div className="mb-4">
-          <Typography variant="h6" className="text-white">Telefone</Typography>
+          <Typography variant="h6" className="text-black">Telefone</Typography>
           <Input
             type="tel"
             size="lg"
@@ -92,7 +87,7 @@ const CreateLawyerForm = ({ handleCreateUser }) => {
             onChange={handleChange}
             placeholder="Informe o telefone"
             required
-            className="mt-2 bg-gray-700 border border-gray-600 text-white"
+            className="mt-2 bg-gray-700 border border-gray-600 text-black"
           />
         </div>
 
@@ -100,14 +95,6 @@ const CreateLawyerForm = ({ handleCreateUser }) => {
           Cadastrar Advogado
         </Button>
       </form>
-
-      <Typography
-        onClick={handleCreateUser}
-        className="text-center mt-6 text-white cursor-pointer hover:underline"
-      >
-        Criar agendamento
-      </Typography>
-    </Card>
   );
 };
 

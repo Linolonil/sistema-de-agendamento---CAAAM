@@ -8,13 +8,13 @@ const router = express.Router();
 router.post('/',authMiddleware, scheduleController.createSchedule);
 
 // Listar todos os agendamentos
-router.get('/',authMiddleware, scheduleController.getAllSchedules);
+router.get('/:date/:time', scheduleController.getAllSchedules);
 
 // Buscar um agendamento pelo ID
 router.get('/:id',authMiddleware, scheduleController.getScheduleById);
 
 // Buscar agendamentos de um dia
-router.get('/schedules/day/:date/:hour',authMiddleware, scheduleController.getSchedulesByDayAndHour);
+router.get('/schedules/day/:date', scheduleController.getSchedulesByDayAndHour);
 
 // Confirmar um agendamento
 router.patch('/:id/confirm',authMiddleware, scheduleController.confirmSchedule);

@@ -5,41 +5,46 @@ import { toast } from 'react-toastify';
 
 export const ScheduleContext = createContext();
 
-const getCurrentDateAndHour = () => {
+
+const getCurrentDate = () => {
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0'); // Adiciona 0 se necessário
   const day = String(now.getDate()).padStart(2, '0');
   const date = `${year}-${month}-${day}`;
-   return { date , hour: `8:00` };
+   return { date  };
 };
 
 
 export const ScheduleProvider = ({ children }) => {
-  // Estados para salas e agendamentos
-  const [occupiedRooms, setOccupiedRooms] = useState([]);
-  const [availableRooms, setAvailableRooms] = useState([]);
+  // Estados para agendamentos
   const [schedules, setSchedules] = useState([]);
+  const [tipoAgendamento, setTipoAgendamento] = useState("meeting");
+  const [userId, setUserId] = useState(null);
   
   // estado para sala de agendamento
-  const [oab, setOab] = useState("");
   const [horario, setHorario] = useState("8:00");
   const [date, setDate] = useState(new Date());
+  const [rooms, setRooms] = useState([]);
   const [roomId, setRoomId] = useState(null);
+
+  // estado para advogado
+  const [oab, setOab] = useState("");
   const [lawyer, setLawyer] = useState(null);
-  const [userId, setUserId] = useState(null);
-  const [tipoAgendamento, setTipoAgendamento] = useState("meeting");
   
   // estados de erro e carregamento
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
   // Estado para armazenar data e hora
-  const [selectedDate, setSelectedDate] = useState(getCurrentDateAndHour().date);
-  const [selectedHour, setSelectedHour] = useState(getCurrentDateAndHour().hour);
+  const [selectedDate, setSelectedDate] = useState();
+
+  useEffect(()=>{
+    setSelectedDate(getCurrentDate().date)
+  },[]),
 
 
-  // Função para buscar user no localstorage
+  // useEffect para buscar user no localstorage
   useEffect(() => {
     const storedUser = localStorage.getItem("@Auth:user"); 
        if (storedUser ) {
@@ -47,23 +52,31 @@ export const ScheduleProvider = ({ children }) => {
     }
   },[])
 
-  // busca agendamentos e salas ocupadas
-  const fetchSchedulesAndRooms = async (date, hour) => {
+  // useEffect pra iniciar as salas
+  useEffect(()=>{
+    fetchRooms()
+  },[])
+
+   // userEffect inicial para buscar com a data atual
+   useEffect(() => {
+    fetchSchedules(selectedDate);
+  }, [selectedDate]);
+
+
+
+  // busca agendamentos 
+  const fetchSchedules = async (date) => {
     const token = localStorage.getItem("@Auth:token");
     setLoading(true);
     try {
-       const response = await api.get(`api/v1/schedules/schedules/day/${date }/${hour}`,{
+       const response = await api.get(`api/v1/schedules/schedules/day/${date}`,{
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      const { schedules, desocupiedRoomNumbers, occupiedRoomNumbers } = response.data;
-      console.log(response.data)
-  
+      const { schedules } = response.data;  
       setSchedules(schedules);
-      setAvailableRooms(desocupiedRoomNumbers);
-      setOccupiedRooms(occupiedRoomNumbers);
-      setError(null); // Limpa qualquer erro anterior
+      setError(null);
     } catch (error) {
       console.log(error);
       setError('Erro ao buscar os dados.');
@@ -71,11 +84,29 @@ export const ScheduleProvider = ({ children }) => {
       setLoading(false);
     }
   };
-  // useEffect inicial para buscar com a data e hora atuais
-  useEffect(() => {
-    fetchSchedulesAndRooms(selectedDate, selectedHour);
-  }, [selectedDate, selectedHour]);
 
+  // busca salas
+  const fetchRooms = async () =>{
+    const token = localStorage.getItem("@Auth:token");
+    setLoading(true);
+    try {
+       const response = await api.get(`/api/v1/room/`,{
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const { rooms } = response.data;  
+      setRooms(rooms);
+      setError(null);
+    } catch (error) {
+      console.log(error);
+      setError('Erro ao buscar os dados das salas.');
+    } finally {
+      setLoading(false);
+    }
+  };
+ 
   // busca o advogado pelo oab
   const getLawyerByOab = async (oab) => {
     try {
@@ -86,6 +117,7 @@ export const ScheduleProvider = ({ children }) => {
       return error.response.data;
     }
   };
+
   // cria novo advogado
   const createLawyer = async (name, oab, phoneNumber) => {
     try {
@@ -96,6 +128,7 @@ export const ScheduleProvider = ({ children }) => {
       return error.response.data;
     }
   };
+
   // cria novo agendamento
   const createSchedule = async ({ date, hour, roomId, lawyerId, userId, type }) => {
     try {
@@ -110,46 +143,50 @@ export const ScheduleProvider = ({ children }) => {
 
         // Verifica se a resposta contém a propriedade 'success' e se é true
         if (response.data.success) {
-          toast.dismiss(); // Dismiss any existing toasts
+          toast.dismiss(); 
             toast.success("Agendamento criado com sucesso!");
             setLawyer(null)
             setOab(null)
             setRoomId(null)
-            await fetchSchedulesAndRooms(selectedDate, selectedHour);
+            await fetchSchedules(selectedDate);
             return;
         } else {
-          toast.dismiss(); // Dismiss any existing toasts
+          toast.dismiss(); 
             toast.error("Erro ao criar agendamento!");
             return;
         }
     } catch (error) {
         console.log(error);
         const errorMessage = error.response?.data?.message || "Erro ao criar agendamento!";
-        toast.dismiss(); // Dismiss any existing toasts
+        toast.dismiss(); 
         toast.error(errorMessage);
         return error.response?.data; // Retorna os dados de erro se disponíveis
     }
 };
 
   // Função para o usuário atualizar a data e hora
-  const updateDateAndHour = (newDate, newHour) => {
+  const updateDate = (newDate) => {
     setSelectedDate(newDate);
-    setSelectedHour(newHour);
   };
+
   // Função para confirmar um agendamento
   const confirmSchedule = async (scheduleId) => {
-    if(!scheduleId || scheduleId === undefined) return toast.info("Sala disponível!");
+    if(!scheduleId || scheduleId === undefined)  {
+
+      toast.dismiss()
+      toast.info("Sala disponível!")
+      return
+    };
 
     try {
       const response = await api.patch(`api/v1/schedules/${scheduleId}/confirm`);
-      if (response.status === 200) {
+        toast.dismiss()
         toast.success(response.data.message);
-        fetchSchedulesAndRooms(selectedDate, selectedHour);
-      } else {
-        toast.error("Erro ao confirmar agendamento!");
-      }
+        fetchSchedules(selectedDate);
+     
     } catch (error) {
       console.log(error);
+      toast.dismiss()
       toast.error("Erro ao confirmar agendamento!");
     }
   }
@@ -162,26 +199,38 @@ export const ScheduleProvider = ({ children }) => {
         hasTV,
         hasComputer,
       });
+  
       if (response.status !== 200) {
         toast.error('Erro ao atualizar a sala!');    
         return;
       }
-      fetchSchedulesAndRooms(selectedDate, selectedHour);
-      toast.dismiss(); // Dismiss any existing toasts
+  
+      // Atualiza o estado das salas com os novos dados
+      setRooms((prevRooms) => 
+        prevRooms.map(room => 
+          room._id === roomId 
+            ? { ...room, hasAirConditioning, hasTV, hasComputer } 
+            : room
+        )
+      );
+  
+      // Atualiza os agendamentos
+      fetchSchedules(selectedDate);
+      toast.dismiss(); 
       toast.success('Sala atualizada com sucesso!');
     } catch (error) {
-      console.log(error)
+      console.log(error);
       toast.error('Erro ao atualizar a sala!');
     }
   };
-
+  
   // exclui um agendamento
   const deleteSchedule = async (scheduleId) => {
     try {
       const response = await api.delete(`api/v1/schedules/delete/${scheduleId}`);
       if (response.status === 200) {
         toast.success(response.data.message);
-        fetchSchedulesAndRooms(selectedDate, selectedHour);
+        fetchSchedules(selectedDate);
       } else {
         toast.error("Erro ao excluir agendamento!");
       }
@@ -207,11 +256,11 @@ export const ScheduleProvider = ({ children }) => {
     setUserId,
     setDate,
     setHorario,
+    fetchRooms,
+    rooms,
     setTipoAgendamento,
     tipoAgendamento,
     changeRoomState,
-    occupiedRooms,
-    availableRooms,
     createSchedule,
     createLawyer,
     confirmSchedule,
@@ -220,8 +269,7 @@ export const ScheduleProvider = ({ children }) => {
     loading,
     error,
     selectedDate,
-    selectedHour,
-    updateDateAndHour, // Função para permitir atualização
+    updateDate,
   };
 
   return (

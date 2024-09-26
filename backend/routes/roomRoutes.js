@@ -25,8 +25,8 @@ router.post('/', async (req, res) => {
 // Listar todas as salas
 router.get('/', async (req, res) => {
   try {
-    const rooms = await Room.find();
-    res.status(200).json(rooms);
+    const rooms = await Room.find({isAvailable: true});
+    res.status(200).json({rooms});
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -47,7 +47,7 @@ router.get('/:id', async (req, res) => {
 // Atualizar as informações de uma sala
 router.put('/:id', async (req, res) => {
   try {
-    const { number, hasAirConditioning,isAvailable, hasTV, hasComputer,  capacity } = req.body;
+    const { number, hasAirConditioning, isAvailable, hasTV, hasComputer,  capacity } = req.body;
 
     // Buscar a sala pelo ID
     const room = await Room.findById(req.params.id);

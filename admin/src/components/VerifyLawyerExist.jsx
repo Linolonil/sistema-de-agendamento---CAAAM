@@ -9,7 +9,6 @@ function VerifyLawyerExist() {
     const [lawyerName, setLawyerName] = useState("");
     const [tempOab, setTempOab] = useState("");
     const [telefone, setTelefone] = useState("");
-    const [displayOab, setDisplayOab] = useState(""); // Estado separado para exibir a OAB
 
     const handleSearchLawyer = async () => {
         if (!tempOab) {
@@ -24,22 +23,23 @@ function VerifyLawyerExist() {
                 setLawyerName(lawyerResponse.lawyer.name);
                 setTelefone(lawyerResponse.lawyer.phoneNumber);
                 setLawyerFound(true);
-                setDisplayOab(tempOab); // Armazena a OAB para exibir
+                toast.dismiss();
                 toast.success("Advogado encontrado!");
             } else {
                 setLawyerFound(false);
-                setDisplayOab(""); // Limpa a OAB se não encontrado
+                toast.dismiss();
                 toast.info("Advogado não encontrado. Será necessário cadastrá-lo.");
             }
         } catch (error) {
             console.log(error);
+            toast.dismiss();
             toast.error("Erro ao buscar advogado. Tente novamente.");
         }
     };
 
     return (
         <>
-            <Typography variant="h6" color="gray" className="mb-2">OAB</Typography>
+            <Typography variant="h6" color="white" className="mb-2 text">OAB</Typography>
             <div className="mb-4 flex items-center gap-5  w-full ">
                 <Input
                     type="text"
@@ -47,10 +47,9 @@ function VerifyLawyerExist() {
                     accept="number"
                     value={tempOab}
                     onChange={(e) => setTempOab(e.target.value)}
-                    required
                     alt="Informe a OAB"
                     placeholder="Informe a OAB"
-                    className="h-full  "
+                    className="h-full  text-white"
                 />
                 <Button onClick={handleSearchLawyer} color="indigo" className=" flex justify-center items-center  h-full w-full text-center px-5">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-5  w-full">
@@ -58,8 +57,8 @@ function VerifyLawyerExist() {
                     </svg>
                 </Button>
             </div>
-            <Typography className="text-sm font-bold text-gray-600 mb-3" color="gray" variant="small">
-                {lawyerFound ? `Nome: ${lawyerName} OAB: ${displayOab} Cel: ${telefone}` : " "}
+            <Typography className="text-sm font-bold text-gray-100" color="gray" variant="small">
+                {lawyerFound ? `Nome: ${lawyerName} Cel: ${telefone}` : " "}
             </Typography>
         </>
     );
