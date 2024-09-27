@@ -20,12 +20,12 @@ const SchedulingPage = () => {
         color="gray"
         floated={false}
         shadow={false}
-        className="m-0 grid place-items-center px-4 py-8 text-center"
+        className="m-0 grid place-items-center p-4 text-center"
       >
         <VerifyLawyerExist />
         
       </CardHeader>
-        <Tabs value={type} className="overflow-visible">
+        <Tabs value={type} className="overflow-visible mt-3">
           <TabsHeader className="relative z-0 ">
             <Tab value="agendamento" onClick={() => setType("agendamento")}>
               criarAgendamento

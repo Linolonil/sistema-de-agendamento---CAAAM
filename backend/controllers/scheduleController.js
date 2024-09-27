@@ -216,7 +216,7 @@ const getSchedulesByDayAndHour = async (req, res) => {
       })
       .populate({
         path: 'lawyerId',
-        select: 'name oab phone',
+        select: 'name oab phoneNumber',
       })
       .populate({
         path: 'userId',

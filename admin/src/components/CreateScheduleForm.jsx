@@ -17,7 +17,7 @@ const getCurrentDateAndHour = (date) => {
 
 const CreateScheduleForm = () => {
   const {
-    updateDateAndHour,
+    updateDate,
     createSchedule,
     roomId,
     lawyer,
@@ -33,14 +33,14 @@ const CreateScheduleForm = () => {
   const handleDateChange = (date) => {
     setDate(date);
     const formattedDate = getCurrentDateAndHour(date);
-    updateDateAndHour(formattedDate, horario);
+    updateDate(formattedDate, horario);
   };
   const handleHorarioChange = (e) => {
     const selectedHorario = e;
     setHorario(selectedHorario);
     if (date) {
       const formattedDate = getCurrentDateAndHour(date);
-      updateDateAndHour(formattedDate, selectedHorario);
+      updateDate(formattedDate, selectedHorario);
     }
   };
 

@@ -164,7 +164,7 @@ export const ScheduleProvider = ({ children }) => {
     }
 };
 
-  // Função para o usuário atualizar a data e hora
+  // Função para o usuário atualizar a data 
   const updateDate = (newDate) => {
     setSelectedDate(newDate);
   };

@@ -23,15 +23,46 @@ function Rooms() {
     setRoomId,
     deleteSchedule,
     changeRoomState,
+    tipoAgendamento,
     horario,
   } = useContext(ScheduleContext);
   const [selectedRoomId, setSelectedRoomId] = useState();
 
   // Função para filtrar os agendamentos pela hora selecionada
   const getFilteredSchedules = () => {
-    return schedules.filter((schedule) => schedule.time === horario); // Filtra pela propriedade `time`
+    return schedules.filter((schedule) => schedule.time === horario); 
   };
 
+  const getRoomsAvailableForHearing = () => {
+    const selectedTime = horario; // Hora selecionada
+    const availableRooms = rooms.filter((room) => {
+      // Verifica se a sala está ocupada nos próximos 3 horários
+      const isRoomOccupied = schedules.some((schedule) => {
+        const scheduleTime = schedule.time; // Hora do agendamento
+        const roomId = schedule.roomId._id;
+  
+        // Verifica se a sala corresponde à sala atual e se está dentro do intervalo de tempo
+        const isSameRoom = roomId === room._id;
+        const isWithinNextThreeHours = isTimeWithinNextThreeHours(scheduleTime, selectedTime);
+  
+        return isSameRoom && isWithinNextThreeHours;
+      });
+  
+      // Retorna true se a sala NÃO estiver ocupada
+      return !isRoomOccupied;
+    });
+  
+    return availableRooms;
+  };
+  
+  const isTimeWithinNextThreeHours = (scheduleTime, selectedTime) => {
+    const [scheduleHour] = scheduleTime.split(':').map(Number);
+    const [selectedHour] = selectedTime.split(':').map(Number);
+  
+    // Verifica se o horário está no intervalo de 3 horas
+    return scheduleHour >= selectedHour && scheduleHour < selectedHour + 3;
+  };
+  
   const handleConfirm = (roomId) => {
     confirmSchedule(roomId);
   };
@@ -47,11 +78,12 @@ function Rooms() {
   };
 
   const renderRooms = () => {
+    const availableRooms = tipoAgendamento === "hearing" ? getRoomsAvailableForHearing() : rooms; // Se for audiência, exibe apenas as disponíveis
     const filteredSchedules = getFilteredSchedules(); // Obtém os agendamentos filtrados
-    return rooms.map((room) => {
-      const schedule = filteredSchedules.find(
-        (schedule) => schedule.roomId._id === room._id
-      ); // Acesso à propriedade correta
+  
+    return availableRooms.map((room) => {
+      const schedule = filteredSchedules.find((schedule) => schedule.roomId._id === room._id); // Filtra o agendamento pela sala atual
+  
 
       return (
         <tr
@@ -85,7 +117,7 @@ function Rooms() {
               className="font-bold overflow-hidden text-ellipsis whitespace-nowrap text-gray-200"
               title={schedule ? schedule.lawyerId.name : ""}
             >
-              {schedule ? schedule.lawyerId.name : "Disponível"}
+              {schedule ? schedule.lawyerId.name.split(" ")[0] : "Disponível"}
             </p>
           </td>
 
@@ -212,30 +244,6 @@ function Rooms() {
 
   return (
     <Card className="h-full w-full overflow-auto bg-dark p-4">
-      {/* Seletor de hora */}
-      {/* <div className="mb-4">
-        <label htmlFor="timeFilter" className="text-white">
-          Filtrar por hora:
-        </label>
-        <select
-          id="timeFilter"
-          value={horario}
-          onChange={(e) => sethorario(e.target.value)}
-          className="ml-2 p-1 rounded border border-gray-600 bg-gray-800 text-white"
-        >
-          <option value="8:00">08:00</option>
-          <option value="9:00">09:00</option>
-          <option value="10:00">10:00</option>
-          <option value="11:00">11:00</option>
-          <option value="12:00">12:00</option>
-          <option value="13:00">13:00</option>
-          <option value="14:00">14:00</option>
-          <option value="15:00">15:00</option>
-          <option value="16:00">16:00</option>
-          <option value="17:00">17:00</option>
-          <option value="18:00">18:00</option>
-        </select>
-      </div> */}
 
       <table className="w-full overflow-hidden h-full table-auto text-center border-collapse">
         <thead className="text-center">
