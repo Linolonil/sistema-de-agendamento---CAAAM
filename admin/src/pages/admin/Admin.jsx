@@ -76,12 +76,12 @@ const Admin = () => {
   };
 
   return (
-    <div className="h-screen w-full bg-gray-800 flex justify-center items-center p-2">
-      <IconButton variant="text" size="lg" onClick={openDrawer}>
+    <div className="h-screen w-full bg-gray-800 flex justify-center items-center p-2 gap-2">
+      <IconButton variant="text" color="white" size="lg" onClick={openDrawer} >
         {isDrawerOpen ? (
-          <XMarkIcon className="h-8 w-8 stroke-2" />
+          <XMarkIcon className="h-full w-8 stroke-2" />
         ) : (
-          <Bars3Icon className="h-8 w-8 stroke-2" />
+          <Bars3Icon className="h-full w-8 stroke-2" />
         )}
       </IconButton>
       <Drawer open={isDrawerOpen} onClose={closeDrawer}>
@@ -102,12 +102,12 @@ const Admin = () => {
                 >
               <ListItemPrefix>
                 <Avatar
-                  size="sm"
-                  src="https://www.material-tailwind.com/img/avatar1.jpg"
+                  size="md"
+                  src={`http://localhost:5000/images/${user.iconProfile}`}
                 />
               </ListItemPrefix>
                   <Typography color="blue-gray" className="mr-auto font-normal">
-                    {user.name} - {user?.role === "admin" ? "Administrador" : "Estágiario"}
+                    {user?.name?.split(" ")[0]} - {user?.role === "admin" ? "Administrador" : "Estágiario"}
                   </Typography>
                 </ListItem>
               </ListItem>
@@ -166,7 +166,7 @@ const Admin = () => {
             </Accordion>
 
             {/* Somente o admin pode ter acesso a essa seção */}
-            {user.role === "intern" && <Accordion
+            {user.role === "admin" && <Accordion
               open={open === 3}
               data-selected={open === 3}
               icon={
@@ -246,7 +246,7 @@ const Admin = () => {
        
         </Card>
       </Drawer>
-      <Card className="h-[calc(100vh-2rem)] w-3/4 mx-auto " color="gray">
+      <Card className="h-full w-full mx-auto " color="gray">
         {activeSection === "profile" && <Profile user={user} />}
         {activeSection === "create-schedule" && <CreateSchedules />}
         {activeSection === "view-schedules" && <ViewSchedules />}

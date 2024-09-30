@@ -78,14 +78,14 @@ const CreateLawyerForm = ({ handleCreateUser }) => {
         </div>
 
         <div className="mb-4">
-          <Typography variant="h6" className="text-black">Telefone</Typography>
+          <Typography variant="h6" className="text-black">Telefone com DDD</Typography>
           <Input
             type="tel"
             size="lg"
             name="phoneNumber"
             value={lawyerData.phoneNumber}
             onChange={handleChange}
-            placeholder="Informe o telefone"
+            placeholder="Ex: 9299887766"
             required
             className="mt-2 bg-gray-700 border border-gray-600 text-black"
           />

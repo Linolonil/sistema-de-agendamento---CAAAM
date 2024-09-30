@@ -1,96 +1,76 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useState } from "react";
 import { toast } from "react-toastify";
-import {
-  Card,
-  Input,
-  Button,
-  Typography,
-} from "@material-tailwind/react";
-import iconDefault from '../../src/assets/default.webp'; 
+import { Card, Input, Button, Typography } from "@material-tailwind/react";
 import api from "../../services/api";
+import { AuthContext } from './../context/AuthContext';
+import { PropTypes } from 'prop-types';
 
 const Profile = ({ user }) => {
-  // Usar useRef para evitar re-renderizações desnecessárias
-  const nameRef = useRef("");
-  const passwordRef = useRef("");
-  const userNameRef = useRef("");
-  const confirmPasswordRef = useRef("");
-
-  // Estado para armazenar a imagem atual e a nova imagem
-  const [currentImage, setCurrentImage] = useState(user.profileImage || iconDefault); 
+  const { SignOut } = useContext(AuthContext);
+  const [name, setName] = useState(user.name || "");
+  const [userName, setUserName] = useState(user.userName || "");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [currentImage, setCurrentImage] = useState(`http://localhost:5000/images/${user.iconProfile}`);
+  const [loading, setLoading] = useState(false);
   const [newImage, setNewImage] = useState(null);
 
-  // Puxar as informações do usuário do localStorage (ou de uma API)
-  useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("@Auth:user"));
-    if (storedUser) {
-      nameRef.current.value = storedUser.name;
-    }
-  }, []);
-
-  // Função para enviar o formulário
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    const name = nameRef.current.value;
-    const password = passwordRef.current.value;
-    const userName = userNameRef.current.value;
-    const confirmPassword = confirmPasswordRef.current.value;
-  
+
+
+    setLoading(true);
+
     if (password !== confirmPassword) {
-      toast.dismiss();
       toast.error("As senhas não coincidem!");
+      setLoading(false);
       return;
     }
-  
+
     try {
-      let updatedUser = {
-        name,
-        userName,
-        password,
-      };
-  
+      const formData = new FormData();
+
+      // Adiciona a nova imagem apenas se uma nova imagem foi escolhida
       if (newImage) {
-        const formData = new FormData();
-        formData.append("iconProfile", newImage); // Adiciona a imagem ao FormData
-  
-        const imageUploadResponse = await api.put(`/api/v1/image/update-profile-image/${user._id}`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-  
-        if (imageUploadResponse.status === 200) {
-          updatedUser.iconProfile = imageUploadResponse.data.iconProfile;
-        }
+        formData.append("iconProfile", newImage);
       }
-  
-      // Atualiza os demais dados do usuário
-      const response = await api.put(`/api/v1/user/update-profile/${user.id}`, updatedUser);
-  
+      if (name) {
+        formData.append("name", name);
+      }
+      if (userName) {
+        formData.append("userName", userName);
+      }
+      if (password) {
+        formData.append("password", password);
+      }
+
+      const response = await api.put(`/api/v1/users/${user._id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       if (response.status === 200) {
-        localStorage.setItem("@Auth:user", JSON.stringify(response.data));
-        toast.dismiss();
         toast.success("Perfil atualizado com sucesso!");
-        setCurrentImage(response.data.iconProfile); // Atualiza a imagem atual
+        setCurrentImage(`http://localhost:5000/images/${response.data.iconProfile}`);
+        setLoading(false);
+        SignOut()
       } else {
-        toast.dismiss();
         toast.error("Erro ao atualizar perfil!");
+        setLoading(false);
       }
     } catch (error) {
       console.log(error);
-      toast.dismiss();
       toast.error("Erro na conexão com o servidor!");
+      setLoading(false);
     }
   };
-  
 
   // Função para lidar com o upload de imagem
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setNewImage(file);
 
-    // Exibir a nova imagem selecionada
     const reader = new FileReader();
     reader.onloadend = () => {
       setCurrentImage(reader.result);
@@ -103,7 +83,7 @@ const Profile = ({ user }) => {
       <Typography variant="h2" className="mr-auto font-normal text-gray-400">
         Perfil de Usuário - {user.name}
       </Typography>
-      <div className="w-full flex justify-evenly  items-center gap-20 ">
+      <div className="w-full flex justify-evenly items-center gap-20">
         {/* Exibição da imagem atual */}
         <div className="flex flex-col items-center">
           <img
@@ -124,56 +104,48 @@ const Profile = ({ user }) => {
         </div>
 
         {/* Formulário de atualização de perfil */}
-        <form className="mt-8 mb-2 w-1/2" onSubmit={handleSubmit}>
+        <form className="mt-8 mb-2 w-1/2 form" onSubmit={handleSubmit}>
           <div className="mb-4 flex flex-col gap-6">
-            <Typography className="mr-auto font-normal text-gray-400">
-              Nome
-            </Typography>
+            <Typography className="mr-auto font-normal text-gray-400">Nome</Typography>
             <Input
               size="lg"
-              ref={nameRef}
-              placeholder={user.name}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="!border-t-blue-gray-200 focus:!border-red-900 text-gray-400"
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
             />
 
-            <Typography className="mr-auto font-normal text-gray-400">
-              User Name
-            </Typography>
+            <Typography className="mr-auto font-normal text-gray-400">User Name</Typography>
             <Input
               size="lg"
-              ref={userNameRef}
-              placeholder={user.userName}
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
               className="!border-t-blue-gray-200 focus:!border-red-900 text-gray-400"
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
             />
 
-            <Typography className="mr-auto font-normal text-gray-400">
-              Nova Senha
-            </Typography>
+            <Typography className="mr-auto font-normal text-gray-400">Nova Senha</Typography>
             <Input
               type="password"
               size="lg"
-              ref={passwordRef}
-              placeholder="********"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="!border-t-blue-gray-200 focus:!border-red-900 text-gray-400"
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
             />
 
-            <Typography className="mr-auto font-normal text-gray-400">
-              Confirmar Senha
-            </Typography>
+            <Typography className="mr-auto font-normal text-gray-400">Confirmar Senha</Typography>
             <Input
               type="password"
               size="lg"
-              ref={confirmPasswordRef}
-              placeholder="********"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               className="!border-t-blue-gray-200 focus:!border-red-900 text-gray-400"
               labelProps={{
                 className: "before:content-none after:content-none",
@@ -182,9 +154,9 @@ const Profile = ({ user }) => {
           </div>
 
           <div className="flex justify-center">
-            <Button color="green">
+            <Button color="green" type="submit">
               <Typography className="mr-auto font-normal text-inherit">
-                Atualizar Perfil
+                {loading ? "Atualizando..." : "Atualizar"}
               </Typography>
             </Button>
           </div>
@@ -192,6 +164,15 @@ const Profile = ({ user }) => {
       </div>
     </Card>
   );
+};
+
+Profile.propTypes = {
+  user: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    name: PropTypes.string,
+    userName: PropTypes.string,
+    iconProfile: PropTypes.string,
+  }).isRequired,
 };
 
 export default Profile;

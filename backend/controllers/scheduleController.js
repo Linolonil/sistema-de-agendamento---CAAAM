@@ -212,7 +212,7 @@ const getSchedulesByDayAndHour = async (req, res) => {
     })
       .populate({
         path: 'roomId',
-        select: 'number',
+        select: 'number capacity',
       })
       .populate({
         path: 'lawyerId',

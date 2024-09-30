@@ -10,11 +10,11 @@ const SchedulingPage = () => {
 
  
   return (
-    <Card className=" w-full h-full mx-auto flex justify-center items-center flex-row    bg-dark ">
-      <div className="w-full lg:w-2/3">
+    <Card className=" w-full h-full mx-auto flex justify-between items-center flex-row    bg-dark ">
+      <div className="w-[70%] lg:w-2/3">
         <Rooms/>
       </div>
-      <Card className="w-full  h-full">
+      <Card className="w-[30%]  h-full">
       <CardBody>
       <CardHeader
         color="gray"
@@ -28,10 +28,10 @@ const SchedulingPage = () => {
         <Tabs value={type} className="overflow-visible mt-3">
           <TabsHeader className="relative z-0 ">
             <Tab value="agendamento" onClick={() => setType("agendamento")}>
-              criarAgendamento
+              Agendamento
             </Tab>
             <Tab value="audiencia" onClick={() => setType("audiencia")}>
-              Criar Advogado
+               Advogado
             </Tab>
           </TabsHeader>
           <TabsBody

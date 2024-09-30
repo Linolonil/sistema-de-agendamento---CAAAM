@@ -42,7 +42,7 @@ const Login = () => {
         {/* Right Section: Login Form */}
         <div className="flex flex-col w-full md:w-1/2 p-8 text-white space-y-6 bg-gray-800 bg-opacity-80 rounded-lg">
           <h1 className="text-3xl text-center font-bold">Login</h1>
-          <form onSubmit={handleSignIn} className="space-y-4">
+          <form onSubmit={handleSignIn} className="space-y-4 pb-5">
             <div>
               <label
                 htmlFor="username"
@@ -81,14 +81,7 @@ const Login = () => {
             >
               Entrar
             </button>
-            <div className="text-center mt-4">
-              <p className="text-gray-400">
-                Não tem uma conta?{" "}
-                <a href="/register" className="text-purple-400 hover:underline">
-                  Registre-se
-                </a>
-              </p>
-            </div>
+           
           </form>
         </div>
       </div>
