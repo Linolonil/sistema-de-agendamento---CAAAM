@@ -7,6 +7,7 @@ import userRoutes from './routes/userRoutes.js';
 import scheduleRoutes from './routes/scheduleRoutes.js';
 import lawyerRoutes from './routes/lawyerRoutes.js';
 import roomRoutes from './routes/roomRoutes.js';
+import profileImageRoutes from './routes/profileImageRoutes.js';
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use(cors())
 //  rotas
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/image', profileImageRoutes);
 app.use('/api/v1/lawyer', lawyerRoutes);
 app.use('/api/v1/room', roomRoutes);
 app.use('/api/v1/schedules', scheduleRoutes);

@@ -28,10 +28,10 @@ export const AuthProvider = ({ children }) => {
     loadingStoreData();
   }, [navigate]);
 
-  const SignIn = async ({ name, password }) => {
+  const SignIn = async ({ userName, password }) => {
     try {
       const response = await api.post("/api/v1/auth/login", {
-        name,
+        userName,
         password,
       });
       if (response.data.token) {

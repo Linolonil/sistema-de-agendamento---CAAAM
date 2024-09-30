@@ -10,11 +10,17 @@ import {
   Typography,
   AccordionBody,
   ListItemPrefix,
+  Drawer,
+  IconButton,
+  AccordionHeader,
 } from "@material-tailwind/react";
 
 import {
-  RectangleGroupIcon,
   ChatBubbleLeftEllipsisIcon,
+  Bars3Icon,
+  XMarkIcon,
+  Cog6ToothIcon,
+  
 } from "@heroicons/react/24/solid";
 
 import logo from "../../assets/image/logocaaam.png";
@@ -26,11 +32,23 @@ import {
 import Profile from "../../components/Profile";
 import CreateSchedules from "../../components/CreateSchedules";
 import ViewSchedules from "../../components/ViewSchedules";
+import { BookA, ChevronRightIcon, UserCircleIcon, UserCog } from "lucide-react";
 
 const Admin = () => {
   const [activeSection, setActiveSection] = useState(null);
   const { signed, SignOut } = useContext(AuthContext);
   const [user, setUser] = useState({});
+
+  const [open, setOpen] = useState(0);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+ 
+  const handleOpen = (value) => {
+    setOpen(open === value ? 0 : value);
+  };
+ 
+  const openDrawer = () => setIsDrawerOpen(true);
+  const closeDrawer = () => setIsDrawerOpen(false);
+ 
 
   useEffect(() => {
     const storedUser = localStorage.getItem("@Auth:user");
@@ -38,15 +56,6 @@ const Admin = () => {
       setUser(JSON.parse(storedUser));
     }
   }, []);
-
-  const [open, setOpen] = useState(0);
-
-  const handleOpen = (value) => {
-    setOpen(open === value ? 0 : value);
-  };
-
-  const LIST_ITEM_STYLES =
-    "text-gray-500 hover:text-white focus:text-white active:text-white hover:bg-opacity-20 focus:bg-opacity-20 active:bg-opacity-20";
 
   const handleWhatsAppRedirect = () => {
     const phoneNumber = "5592985515439";
@@ -68,92 +77,155 @@ const Admin = () => {
 
   return (
     <div className="h-screen w-full bg-gray-800 flex justify-center items-center p-2">
-      <Card
-        className="h-[calc(100vh-2rem)] w-1/2 max-w-[20rem] mx-auto p-6 shadow-md"
-        color="gray"
-      >
-        <div className="mb-2 flex items-center gap-4 p-4">
-          <img src={logo} alt="logo" className="h-auto w-full" />
-        </div>
-        <hr className="my-2 border-gray-800" />
-        <List>
-          <Accordion open={open === 1}>
-            <ListItem
-              selected={open === 1}
-              data-selected={open === 1}
-              onClick={() => handleOpen(1)}
-              className="p-3 hover:bg-opacity-20 text-gray-500 select-none focus:bg-opacity-20 active:bg-opacity-20 data-[selected=true]:bg-gray-50/20 hover:text-white focus:text-white active:text-white data-[selected=true]:text-white"
-            >
+      <IconButton variant="text" size="lg" onClick={openDrawer}>
+        {isDrawerOpen ? (
+          <XMarkIcon className="h-8 w-8 stroke-2" />
+        ) : (
+          <Bars3Icon className="h-8 w-8 stroke-2" />
+        )}
+      </IconButton>
+      <Drawer open={isDrawerOpen} onClose={closeDrawer}>
+        <Card color="transparent" shadow={false} className="h-[calc(100vh-2rem)] w-full p-4">
+          <div className="mb-2 flex items-center gap-4 p-4">
+            <img
+      src={logo} alt="logo"
+              className="h-auto w-full"
+            />
+          </div>
+          <hr className=" border-gray-400" />
+
+          <List>
+              <ListItem className="p-0" selected={open === 1}>
+                <ListItem
+                  onClick={() => handleOpen(1)}
+                  className="border-b-0 p-3"
+                >
               <ListItemPrefix>
                 <Avatar
                   size="sm"
                   src="https://www.material-tailwind.com/img/avatar1.jpg"
                 />
               </ListItemPrefix>
-              <Typography className="mr-auto font-normal text-inherit">
-                {user.name ? user.name : "Usuário"}
-              </Typography>
-              <ChevronDownIcon
-                strokeWidth={3}
-                className={`ml-auto text-gray-500 h-4 w-4 transition-transform ${
-                  open === 1 ? "rotate-180" : ""
-                }`}
-              />
-            </ListItem>
-            <AccordionBody className="py-1">
-              <List className="p-0">
-                <ListItem
-                  className={LIST_ITEM_STYLES}
-                  onClick={() => setActiveSection("profile")}
-                >
-                  Meu Perfil
+                  <Typography color="blue-gray" className="mr-auto font-normal">
+                    {user.name} - {user?.role === "admin" ? "Administrador" : "Estágiario"}
+                  </Typography>
                 </ListItem>
-              </List>
-            </AccordionBody>
-          </Accordion>
-          <hr className="my-2 border-gray-800" />
-          <Accordion open={open === 2}>
-            <ListItem
-              selected={open === 2}
-              data-selected={open === 2}
-              onClick={() => handleOpen(2)}
-              className="px-3 py-[9px] hover:bg-opacity-20 text-gray-500 select-none focus:bg-opacity-20 active:bg-opacity-20 data-[selected=true]:bg-gray-50/20 hover:text-white focus:text-white active:text-white data-[selected=true]:text-white"
-            >
+              </ListItem>
+
+              <ListItem onClick={() => setActiveSection("profile")}>
               <ListItemPrefix>
-                <RectangleGroupIcon className="h-5 w-5" />
+                <UserCircleIcon className="h-5 w-5" />
               </ListItemPrefix>
-              <Typography className="mr-auto font-normal text-inherit">
-                Agendamento
-              </Typography>
-              <ChevronDownIcon
-                strokeWidth={3}
-                className={`ml-auto text-gray-500 h-4 w-4 transition-transform ${
-                  open === 2 ? "rotate-180" : ""
-                }`}
-              />
+              Perfil
+              </ListItem>
+              
+            <Accordion
+              open={open === 2}
+              data-selected={open === 2}
+              icon={
+                <ChevronDownIcon
+                  strokeWidth={2.5}
+                  className={`mx-auto h-4 w-4 transition-transform ${
+                    open === 2 ? "rotate-180" : ""
+                  }`}
+                />
+              }
+            >
+              <ListItem className="p-0" selected={open === 2}>
+                <AccordionHeader
+                  onClick={() => handleOpen(2)}
+                  className="border-b-0 p-3"
+                >
+                  <ListItemPrefix>
+                  <BookA />
+                  </ListItemPrefix>
+                  <Typography color="blue-gray" className="mr-auto font-normal">
+                    Agendamentos
+                  </Typography>
+                </AccordionHeader>
+              </ListItem>
+              
+              <AccordionBody className="py-1">
+                <List className="p-0">
+                  <ListItem onClick={() => setActiveSection("create-schedule")}
+                  >
+                    <ListItemPrefix>
+                      <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
+                    </ListItemPrefix>
+                    Criar agendamento
+                  </ListItem>
+                  <ListItem onClick={() => setActiveSection("view-schedules")}
+                  >
+                    <ListItemPrefix>
+                      <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
+                    </ListItemPrefix>
+                    Buscar agendamento
+                  </ListItem>
+                </List>
+              </AccordionBody>
+            </Accordion>
+
+            {/* Somente o admin pode ter acesso a essa seção */}
+            {user.role === "intern" && <Accordion
+              open={open === 3}
+              data-selected={open === 3}
+              icon={
+                <ChevronDownIcon
+                  strokeWidth={2.5}
+                  className={`mx-auto h-4 w-4 transition-transform ${
+                    open === 2 ? "rotate-180" : ""
+                  }`}
+                />
+              }
+            >
+              <ListItem className="p-0" selected={open === 3}>
+                <AccordionHeader
+                  onClick={() => handleOpen(3)}
+                  className="border-b-0 p-3"
+                >
+                  <ListItemPrefix>
+                  <UserCog />
+                  </ListItemPrefix>
+                  <Typography color="blue-gray" className="mr-auto font-normal">
+                    Controle de Usuários
+                  </Typography>
+                </AccordionHeader>
+              </ListItem>
+              
+              <AccordionBody className="py-1">
+                <List className="p-0">
+                  <ListItem onClick={() => setActiveSection("create-schedule")}
+                  >
+                    <ListItemPrefix>
+                      <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
+                    </ListItemPrefix>
+                    Criar novo usuário
+                  </ListItem>
+                  <ListItem onClick={() => setActiveSection("view-schedules")}
+                  >
+                    <ListItemPrefix>
+                      <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
+                    </ListItemPrefix>
+                    Alterar dados do usuário
+                  </ListItem>
+                  <ListItem onClick={() => setActiveSection("view-schedules")}
+                  >
+                    <ListItemPrefix>
+                      <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
+                    </ListItemPrefix>
+                    Lista de usuários
+                  </ListItem>
+                </List>
+              </AccordionBody>
+            </Accordion>
+          }            
+            <ListItem>
+              <ListItemPrefix>
+                <Cog6ToothIcon className="h-5 w-5" />
+              </ListItemPrefix>
+              Configurações
             </ListItem>
-            <AccordionBody className="py-1">
-              <List className="p-0">
-                <ListItem
-                  className={LIST_ITEM_STYLES}
-                  onClick={() => setActiveSection("create-schedule")}
-                >
-                  Criar agendamento
-                </ListItem>
-                <ListItem
-                  className={LIST_ITEM_STYLES}
-                  onClick={() => setActiveSection("view-schedules")}
-                >
-                  Buscar todos os agendamentos
-                </ListItem>
-              </List>
-            </AccordionBody>
-          </Accordion>
-        </List>
-        <hr className="my-2 border-gray-800" />
-        <List>
-          <ListItem
-            className={LIST_ITEM_STYLES}
+            <ListItem
             onClick={handleWhatsAppRedirect}
           >
             <ListItemPrefix>
@@ -161,7 +233,7 @@ const Admin = () => {
             </ListItemPrefix>
             Suporte
           </ListItem>
-          <ListItem className={LIST_ITEM_STYLES} onClick={handleLogout}>
+          <ListItem onClick={handleLogout}>
             <ListItemPrefix>
               <ArrowLeftStartOnRectangleIcon
                 strokeWidth={2.5}
@@ -170,8 +242,10 @@ const Admin = () => {
             </ListItemPrefix>
             Sair
           </ListItem>
-        </List>
-      </Card>
+          </List>
+       
+        </Card>
+      </Drawer>
       <Card className="h-[calc(100vh-2rem)] w-3/4 mx-auto " color="gray">
         {activeSection === "profile" && <Profile user={user} />}
         {activeSection === "create-schedule" && <CreateSchedules />}
@@ -185,3 +259,5 @@ const Admin = () => {
 };
 
 export default Admin;
+
+

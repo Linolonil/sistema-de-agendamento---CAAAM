@@ -4,17 +4,27 @@ import argon2 from 'argon2';
 // Criar um novo usuário
 const createUser = async (req, res) => {
   try {
-    const { name, role, password } = req.body;
+    const { name, role, password, userName } = req.body;
+
+    // Verificar campos obrigatórios
+    if (!name || !userName || !password || !role) {
+      return res.status(400).json({ message: 'Todos os campos são obrigatórios' });
+    }
     
-    // Verificar se o usuário já existe
-    const existingUser = await User.findOne({ name });
-    if (existingUser) return res.status(400).json({ message: 'Usuário já cadastrado' });
+    // Verificar se o nome de usuário já existe
+    const existingUser = await User.findOne({ userName: userName.toLowerCase() });
+    if (existingUser) return res.status(400).json({ message: 'Nome de usuário já cadastrado' });
 
     // Hash da senha
     const hashedPassword = await argon2.hash(password);
 
     // Criar um novo usuário
-    const user = new User({ name, role, password: hashedPassword });
+    const user = new User({ 
+      name, 
+      userName: userName.toLowerCase(), 
+      role, 
+      password: hashedPassword 
+    });
     await user.save();
 
     res.status(201).json({ message: 'Usuário registrado com sucesso' });
@@ -50,11 +60,15 @@ const getUserById = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, role, password } = req.body;
+    const { name, role, password, userName } = req.body;
+
+    // Verificar campos obrigatórios
+    if (!id) return res.status(400).json({ message: 'ID é obrigatório' });
 
     const user = await User.findById(id);
     if (!user) return res.status(404).json({ message: 'Usuário não encontrado' });
 
+    // Atualizar campos apenas se forem fornecidos
     if (password) {
       user.password = await argon2.hash(password);
     }
@@ -64,9 +78,15 @@ const updateUser = async (req, res) => {
     if (role) {
       user.role = role;
     }
+    if (userName) {
+      const existingUserName = await User.findOne({ userName: userName.toLowerCase() });
+      if (existingUserName && existingUserName._id.toString() !== id) {
+        return res.status(400).json({ message: 'Nome de usuário já cadastrado' });
+      }
+      user.userName = userName.toLowerCase();
+    }
 
     await user.save();
-
     res.status(200).json({ message: 'Usuário atualizado com sucesso', user });
   } catch (error) {
     res.status(500).json({ message: error.message });
