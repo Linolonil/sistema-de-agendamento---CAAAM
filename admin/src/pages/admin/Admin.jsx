@@ -33,6 +33,7 @@ import Profile from "../../components/Profile";
 import CreateSchedules from "../../components/CreateSchedules";
 import ViewSchedules from "../../components/ViewSchedules";
 import { BookA, ChevronRightIcon, UserCircleIcon, UserCog } from "lucide-react";
+import ViewSchedulesStatus from "../../components/ViewSchedulesStatus";
 
 const Admin = () => {
   const [activeSection, setActiveSection] = useState(null);
@@ -161,6 +162,13 @@ const Admin = () => {
                     </ListItemPrefix>
                     Buscar agendamento
                   </ListItem>
+                  <ListItem onClick={() => setActiveSection("view-schedules-status")}
+                  >
+                    <ListItemPrefix>
+                      <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
+                    </ListItemPrefix>
+                    Dados 
+                  </ListItem>
                 </List>
               </AccordionBody>
             </Accordion>
@@ -219,12 +227,12 @@ const Admin = () => {
               </AccordionBody>
             </Accordion>
           }            
-            <ListItem>
+            {/* <ListItem>
               <ListItemPrefix>
                 <Cog6ToothIcon className="h-5 w-5" />
               </ListItemPrefix>
               Configurações
-            </ListItem>
+            </ListItem> */}
             <ListItem
             onClick={handleWhatsAppRedirect}
           >
@@ -250,8 +258,9 @@ const Admin = () => {
         {activeSection === "profile" && <Profile user={user} />}
         {activeSection === "create-schedule" && <CreateSchedules />}
         {activeSection === "view-schedules" && <ViewSchedules />}
+        {activeSection === "view-schedules-status" && <ViewSchedulesStatus />}
         {!activeSection && (
-          <viewSchedulesStatus/>
+          <ViewSchedulesStatus/>
         )}
       </Card>
     </div>
