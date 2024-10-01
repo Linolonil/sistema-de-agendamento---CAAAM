@@ -36,12 +36,10 @@ router.get('/', async (req, res) => {
 });
 
 // atualizar um advogado
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req, res) => { 
   try {
     const { id } = req.params;
     const { name, oab, phoneNumber } = req.body;
-
-    // Busca o advogado pelo ID
     const lawyer = await Lawyer.findById(id);
     if (!lawyer) {
       return res.status(404).json({ message: 'Advogado não encontrado' });
@@ -51,11 +49,10 @@ router.put('/:id', async (req, res) => {
     lawyer.oab = oab !== undefined ? oab : lawyer.oab;
     lawyer.phoneNumber = phoneNumber !== undefined ? phoneNumber : lawyer.phoneNumber;
 
-
     // Salva as mudanças no banco de dados
     await lawyer.save();
 
-    res.status(200).json({ message: 'Advogado atualizado com sucesso', lawyer });
+    res.status(200).json({ success:true, message: 'Advogado atualizado com sucesso', lawyer });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

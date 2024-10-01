@@ -16,7 +16,7 @@ import { useEffect, useState } from "react";
 import { PropTypes } from 'prop-types';
 
 // Componente do cartão KPI
-export const KpiCard = ({ title, percentage, price, color, icon }) => {
+export const KpiCard = ({ title = "Default Title", price = 0, icon }) => {
   return (
     <Card className="shadow-sm border border-gray-200 !rounded-lg">
       <CardBody className="p-4">
@@ -24,7 +24,6 @@ export const KpiCard = ({ title, percentage, price, color, icon }) => {
           <Typography className="!font-medium !text-xs text-gray-600">{title}</Typography>
           <div className="flex items-center gap-1">
             {icon}
-            <Typography color={color} className="font-medium !text-xs">{percentage}</Typography>
           </div>
         </div>
         <Typography color="blue-gray" className="mt-1 font-bold text-2xl">{price}</Typography>
@@ -32,6 +31,7 @@ export const KpiCard = ({ title, percentage, price, color, icon }) => {
     </Card>
   );
 };
+
 
 function ViewSchedulesStatus() {
   const [data, setData] = useState([]);
@@ -42,7 +42,6 @@ function ViewSchedulesStatus() {
       try {
         const response = await api.get('/api/v1/schedules/data');
         const { totalAgendamentos, totalAdvogadosCadastrados, totalMeetings, totalHearings, monthlyAgendamentos } = response.data;
-        console.log(response.data);
 
         const months = [
             "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -59,7 +58,7 @@ function ViewSchedulesStatus() {
         // Definindo os KPIs
         setKpiData([
           {
-            title: "Agendamentos de Hoje",
+            title: "Agendamentos",
             price: totalAgendamentos,
             color: "red",
             icon: <DownloadIcon strokeWidth={4} className="w-3 h-3 text-red-500" />,
@@ -132,12 +131,10 @@ function ViewSchedulesStatus() {
 }
 
 KpiCard.propTypes = {
-    title: PropTypes.string.isRequired,
-    percentage: PropTypes.string.isRequired, 
-    price: PropTypes.string.isRequired,      
-    color: PropTypes.string.isRequired,
-    icon: PropTypes.node.isRequired,         
-  };
+  title: PropTypes.string.isRequired,
+  price: PropTypes.number,      
+  icon: PropTypes.node.isRequired,         
+};
   
 
 export default ViewSchedulesStatus;

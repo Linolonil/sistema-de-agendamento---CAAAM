@@ -113,7 +113,7 @@ function Rooms() {
     if (type === "meeting") {
         message = `Confirmado agendamento para reunião na Sala: ${roomNumber}.\nData: ${dateFormatted}.\nHorário: ${startTime}:00 - ${endTime}:00.\nNúmero máximo de pessoas: ${maxPeople}.\nTolerância de 15 minutos, após o prazo a sala será disponibilizada para novo atendimento (em caso de atraso, avisar imediatamente o atendimento).`;
     } else if (type === "hearing") {
-        message = `Confirmado agendamento para audiência na Sala: ${roomNumber}.\nData: ${dateFormatted}.\nHorário: ${startTime}:00 - ${endTime}:00.\nNúmero máximo de pessoas: ${maxPeople}.\nTolerância de 15 minutos, após o prazo a sala será disponibilizada para novo atendimento (em caso de atraso, avisar imediatamente o atendimento).`;
+        message = `Confirmado agendamento para audiência na Sala: ${roomNumber}.\nData: ${dateFormatted}.\nHorário: ${startTime}:00 - ${endTime + 1}:00.\nNúmero máximo de pessoas: ${maxPeople}.\nTolerância de 15 minutos, após o prazo a sala será disponibilizada para novo atendimento (em caso de atraso, avisar imediatamente o atendimento).`;
     } else {
         console.error("Tipo de agendamento inválido.");
         return;

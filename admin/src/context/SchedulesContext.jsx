@@ -12,7 +12,7 @@ const getCurrentDate = () => {
   const month = String(now.getMonth() + 1).padStart(2, '0'); // Adiciona 0 se necessário
   const day = String(now.getDate()).padStart(2, '0');
   const date = `${year}-${month}-${day}`;
-   return { date  };
+   return  {date}  ;
 };
 
 
@@ -31,18 +31,24 @@ export const ScheduleProvider = ({ children }) => {
   // estado para advogado
   const [oab, setOab] = useState("");
   const [lawyer, setLawyer] = useState(null);
+
+  // estados de busca de advg
+  const [lawyerName, setLawyerName] = useState("");
+  const [tempOab, setTempOab] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [lawyerFound, setLawyerFound] = useState(false);
   
   // estados de erro e carregamento
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
   // Estado para armazenar data e hora
-  const [selectedDate, setSelectedDate] = useState();
+  const [selectedDate, setSelectedDate] = useState("");
 
   useEffect(()=>{
-    setSelectedDate(getCurrentDate().date)
+    const datee = getCurrentDate().date
+    setSelectedDate(datee)
   },[]),
-
 
   // useEffect para buscar user no localstorage
   useEffect(() => {
@@ -62,8 +68,6 @@ export const ScheduleProvider = ({ children }) => {
     fetchSchedules(selectedDate);
   }, [selectedDate]);
 
-
-
   // busca agendamentos 
   const fetchSchedules = async (date) => {
     const token = localStorage.getItem("@Auth:token");
@@ -74,9 +78,12 @@ export const ScheduleProvider = ({ children }) => {
           'Authorization': `Bearer ${token}`
         }
       });
+
+      console.log(response.data);
       const { schedules } = response.data;  
-      setSchedules(schedules);
+      await setSchedules(schedules);
       setError(null);
+      return
     } catch (error) {
       console.log(error);
       setError('Erro ao buscar os dados.');
@@ -141,14 +148,19 @@ export const ScheduleProvider = ({ children }) => {
             type,
         });
 
+        const cleanValues = () => {
+          setLawyerFound("")
+          setOab("")
+          setTempOab("")
+          setTelefone("")
+        };
+
         // Verifica se a resposta contém a propriedade 'success' e se é true
         if (response.data.success) {
           toast.dismiss(); 
             toast.success("Agendamento criado com sucesso!");
-            setLawyer(null)
-            setOab(null)
-            setRoomId(null)
             await fetchSchedules(selectedDate);
+            cleanValues();
             return;
         } else {
           toast.dismiss(); 
@@ -194,7 +206,7 @@ export const ScheduleProvider = ({ children }) => {
   // função pra mudar o estado da sala, se tem ar, tv
   const changeRoomState = async (roomId, hasAirConditioning, hasTV, hasComputer) => {
     try {
-      const response = await api.put(`http://localhost:5000/api/v1/room/${roomId}`, {
+      const response = await api.put(`/api/v1/room/${roomId}`, {
         hasAirConditioning,
         hasTV,
         hasComputer,
@@ -238,8 +250,8 @@ export const ScheduleProvider = ({ children }) => {
       console.log(error);
       toast.error("Erro ao excluir agendamento!");
     }
-  }             
-
+  }
+               
 
   // valores do contexto
   const value = {
@@ -270,6 +282,14 @@ export const ScheduleProvider = ({ children }) => {
     error,
     selectedDate,
     updateDate,
+    lawyerName,
+    tempOab,
+    telefone,
+    setLawyerName,
+    setTempOab,
+    setTelefone,
+    lawyerFound,
+    setLawyerFound,
   };
 
   return (

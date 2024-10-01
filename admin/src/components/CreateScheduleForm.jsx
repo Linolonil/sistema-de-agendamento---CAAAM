@@ -64,7 +64,7 @@ const CreateScheduleForm = () => {
         date: formattedDate,
         hour: horario,
         roomId,
-        lawyerId: lawyer.lawyer._id, // Acesso seguro
+        lawyerId: lawyer.lawyer._id, 
         userId,
         type: tipoAgendamento,
       });
@@ -77,7 +77,7 @@ const CreateScheduleForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-1 mt-3">
+    <form onSubmit={handleSubmit} className="p-1 mt-3 h-full w-full ">
         <div className="mb-4 ">
           <Typography variant="h6" className="text-gray-900">
             Data
@@ -147,7 +147,7 @@ const CreateScheduleForm = () => {
       <Button
         type="submit"
         disabled={!lawyer}
-        className="mt-6 w-full bg-green-600 hover:bg-green-700"
+        className="mt-4  w-full bg-green-600 hover:bg-green-700 "
       >
         Agendar
       </Button>

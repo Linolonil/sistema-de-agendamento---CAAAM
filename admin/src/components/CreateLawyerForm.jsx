@@ -2,9 +2,8 @@ import { useState, useContext } from "react";
 import { toast } from "react-toastify";
 import { Input, Button, Typography } from "@material-tailwind/react";
 import ScheduleContext from "../context/SchedulesContext";
-import { PropTypes } from "prop-types";
 
-const CreateLawyerForm = ({ handleCreateUser }) => {
+const CreateLawyerForm = ( ) => {
   const [lawyerData, setLawyerData] = useState({
     name: "",
     oab: "",
@@ -25,27 +24,36 @@ const CreateLawyerForm = ({ handleCreateUser }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { name, oab, phoneNumber } = lawyerData;
-
+  
     // Verifica se todos os campos foram preenchidos
     if (!name || !oab || !phoneNumber) {
       toast.error("Preencha todos os campos!");
       return;
     }
-
+  
     try {
       const response = await createLawyer(name, oab, phoneNumber);
       if (response.success) {
         setLawyer(response.lawyer._id);
         toast.success("Advogado cadastrado com sucesso!");
-        handleCreateUser(); // Chama a função após o sucesso
+        
+        // Limpa os campos de input
+        setLawyerData({
+          name: "",
+          oab: "",
+          phoneNumber: "",
+        });
+        return;
       } else {
         toast.error("Advogado já cadastrado!");
+        return;
       }
     } catch (error) {
       console.error("Erro ao cadastrar advogado:", error);
       toast.error("Erro ao cadastrar advogado!");
     }
   };
+  
 
   return (
       <form onSubmit={handleSubmit} className="p-1 mt-3">
@@ -96,11 +104,6 @@ const CreateLawyerForm = ({ handleCreateUser }) => {
         </Button>
       </form>
   );
-};
-
-// Define os tipos de props esperados
-CreateLawyerForm.propTypes = {
-  handleCreateUser: PropTypes.func.isRequired,
 };
 
 export default CreateLawyerForm;

@@ -7,8 +7,17 @@ function App() {
   return (
     <>
       <AppRouter />
-      <ToastContainer />
-    </>
+      <ToastContainer
+        position="top-left" 
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover={false} // Desativa pausa ao passar o mouse
+      />    </>
   );
 }
 
