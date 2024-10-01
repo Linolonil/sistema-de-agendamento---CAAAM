@@ -1,7 +1,7 @@
 import Schedule from "../models/Schedule.js";
 import User from "../models/User.js";
 import Lawyer from "../models/Lawyer.js";
-import { parseISO, isWeekend,isValid, startOfDay, endOfDay  } from 'date-fns';
+import { parseISO, isWeekend,isValid, startOfDay, endOfDay, startOfMonth, endOfMonth  } from 'date-fns';
 import Room from "../models/Room.js";
 
 const checkConflictingSchedules = async (parsedDate, hour, duration, roomId) => {
@@ -196,6 +196,7 @@ const deleteSchedules = async (req, res) => {
 const getSchedulesByDayAndHour = async (req, res) => {
   try {
     const { date } = req.params; // Obter data e hora da query param
+    
     if (!date) {
       return res.status(400).json({ message: 'Por favor, forneça uma data e uma hora válidas.' });
     }
@@ -255,8 +256,71 @@ const confirmSchedule = async (req, res) => {
   }
 };
 
+
+
+const getMonthName = (monthNumber) => {
+  const months = [
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+  ];
+
+  return months[monthNumber - 1] || "Mês inválido";
+};
+
+const getAll = async (req, res) => {
+  try {
+    // Definir o mês atual
+    const start = startOfMonth(new Date());
+    const end = endOfMonth(new Date());
+
+    // Contar o total de agendamentos do dia atual
+    const totalAgendamentos = await Schedule.countDocuments({
+      date: { $gte: start, $lte: end }, // Contar agendamentos do mês atual
+    });
+
+    // Contar o total de advogados
+    const totalAdvogadosCadastrados = await Lawyer.countDocuments();
+
+    // Contar o total de reuniões
+    const totalMeetings = await Schedule.countDocuments({ type: 'meeting' });
+
+    // Contar o total de audiências
+    const totalHearings = await Schedule.countDocuments({ type: 'hearing' });
+
+    // Buscar total de agendamentos por mês
+    const monthlyAgendamentos = await Schedule.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: "$date" },
+            month: { $month: "$date" }
+          },
+          total: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { "_id.year": 1, "_id.month": 1 } // Ordenar por ano e mês
+      }
+    ]);
+
+    // Retornar os resultados
+    res.status(200).json({
+      totalAgendamentos,
+      totalAdvogadosCadastrados,
+      totalMeetings,
+      totalHearings,
+      monthlyAgendamentos, 
+    });
+  } catch (error) {
+    console.error('Erro ao buscar os dados:', error);
+    res.status(500).json({ message: 'Erro ao buscar os dados' });
+  }
+};
+
+
 export default {
   createSchedule,
+  getAll,
   getAllSchedules,
   getSchedulesByDayAndHour,
   deleteAllSchedules,

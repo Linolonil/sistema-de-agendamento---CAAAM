@@ -7,6 +7,9 @@ const router = express.Router();
 // Criar um novo agendamento
 router.post('/',authMiddleware, scheduleController.createSchedule);
 
+// todos os agendamentos
+router.get('/data',authMiddleware, scheduleController.getAll);
+
 // Listar todos os agendamentos
 router.get('/:date/:time', scheduleController.getAllSchedules);
 
