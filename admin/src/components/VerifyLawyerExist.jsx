@@ -159,7 +159,7 @@ function VerifyLawyerExist() {
               <Input
                 type="text"
                 size="lg"
-                value={!newName ? lawyer?.lawyer.name : newName }
+                value={!newName ? lawyer?.lawyer?.name : newName }
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="Nome do Advogado"
                 required
@@ -174,7 +174,7 @@ function VerifyLawyerExist() {
               <Input
                 type="text"
                 size="lg"
-                value={!newOab ? lawyer?.lawyer.oab : newOab}
+                value={!newOab ? lawyer?.lawyer?.oab : newOab}
                 onChange={(e) => setNewOab(e.target.value)}
                 placeholder="Informe a OAB"
                 required
@@ -189,7 +189,7 @@ function VerifyLawyerExist() {
               <Input
                 type="tel"
                 size="lg"
-                value={!newPhoneNumber ? lawyer?.lawyer.phoneNumber : newPhoneNumber}
+                value={!newPhoneNumber ? lawyer?.lawyer?.phoneNumber : newPhoneNumber}
                 onChange={(e) => setNewPhoneNumber(e.target.value)}
                 placeholder="Ex: 9299887766"
                 required
