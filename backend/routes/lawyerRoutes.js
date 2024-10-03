@@ -45,14 +45,29 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ message: 'Advogado não encontrado' });
     }
 
-    lawyer.name = name !== undefined ? name : lawyer.name;
-    lawyer.oab = oab !== undefined ? oab : lawyer.oab;
-    lawyer.phoneNumber = phoneNumber !== undefined ? phoneNumber : lawyer.phoneNumber;
+    let isUpdated = false; // Variável para verificar se houve atualização
 
-    // Salva as mudanças no banco de dados
-    await lawyer.save();
+    // Verifica se os novos valores são diferentes dos existentes
+    if (name !== undefined && name !== lawyer.name) {
+      lawyer.name = name;
+      isUpdated = true;
+    }
+    if (oab !== undefined && oab !== lawyer.oab) {
+      lawyer.oab = oab;
+      isUpdated = true;
+    }
+    if (phoneNumber !== undefined && phoneNumber !== lawyer.phoneNumber) {
+      lawyer.phoneNumber = phoneNumber;
+      isUpdated = true;
+    }
 
-    res.status(200).json({ success:true, message: 'Advogado atualizado com sucesso', lawyer });
+    // Salva as mudanças no banco de dados se houver alguma alteração
+    if (isUpdated) {
+      await lawyer.save();
+      return res.status(200).json({ success: true, message: 'Advogado atualizado com sucesso', lawyer });
+    } else {
+      return res.status(200).json({ success: false, message: 'Nenhuma alteração realizada' });
+    }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

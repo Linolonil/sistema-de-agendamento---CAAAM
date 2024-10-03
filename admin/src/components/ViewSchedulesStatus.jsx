@@ -1,8 +1,5 @@
 
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
-} from "recharts";
-import {
   Card,
   CardBody,
   Typography,
@@ -34,26 +31,13 @@ export const KpiCard = ({ title = "Default Title", price = 0, icon }) => {
 
 
 function ViewSchedulesStatus() {
-  const [data, setData] = useState([]);
   const [kpiData, setKpiData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await api.get('/api/v1/schedules/data');
-        const { totalAgendamentos, totalAdvogadosCadastrados, totalMeetings, totalHearings, monthlyAgendamentos } = response.data;
-
-        const months = [
-            "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-            "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-          ];
-          
-          const monthlyData = monthlyAgendamentos.map(item => ({
-            name: `${months[item._id.month - 1]}`, // Exibe o nome do mês e o ano
-            value: item.total // Total de agendamentos do mês
-          }));
-
-        setData(monthlyData);
+        const { totalAgendamentos, totalAdvogadosCadastrados, totalMeetings, totalHearings } = response.data;
 
         // Definindo os KPIs
         setKpiData([
@@ -95,7 +79,7 @@ function ViewSchedulesStatus() {
       <CardBody className="p-6">
         <Typography variant="h5" className="mb-4">Status dos Agendamentos</Typography>
 
-        <div className="h-72">
+        {/* <div className="h-72">
           <ResponsiveContainer>
             <LineChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -106,7 +90,7 @@ function ViewSchedulesStatus() {
               <Line type="monotone" dataKey="value" stroke="#4bc0c0" activeDot={{ r: 8 }} />
             </LineChart>
           </ResponsiveContainer>
-        </div>
+        </div> */}
 
         <div className="shrink-0 mt-4">
           <Menu>

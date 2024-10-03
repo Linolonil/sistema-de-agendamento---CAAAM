@@ -193,10 +193,10 @@ const deleteSchedules = async (req, res) => {
 };
 
 // Buscar agendamentos de um dia
+      
 const getSchedulesByDayAndHour = async (req, res) => {
   try {
     const { date } = req.params; // Obter data e hora da query param
-    
     if (!date) {
       return res.status(400).json({ message: 'Por favor, forneça uma data e uma hora válidas.' });
     }
@@ -257,15 +257,6 @@ const confirmSchedule = async (req, res) => {
 };
 
 
-
-const getMonthName = (monthNumber) => {
-  const months = [
-    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-  ];
-
-  return months[monthNumber - 1] || "Mês inválido";
-};
 
 const getAll = async (req, res) => {
   try {

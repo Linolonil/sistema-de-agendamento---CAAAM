@@ -43,12 +43,8 @@ export const ScheduleProvider = ({ children }) => {
   const [error, setError] = useState(null);
   
   // Estado para armazenar data e hora
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState(getCurrentDate().date);
 
-  useEffect(()=>{
-    const datee = getCurrentDate().date
-    setSelectedDate(datee)
-  },[]),
 
   // useEffect para buscar user no localstorage
   useEffect(() => {
@@ -79,7 +75,6 @@ export const ScheduleProvider = ({ children }) => {
         }
       });
 
-      console.log(response.data);
       const { schedules } = response.data;  
       await setSchedules(schedules);
       setError(null);

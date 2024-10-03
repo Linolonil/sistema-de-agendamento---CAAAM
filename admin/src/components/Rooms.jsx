@@ -41,8 +41,9 @@ function Rooms() {
     tipoAgendamento,
     horario,
   } = useContext(ScheduleContext);
-  const [selectedRoomId, setSelectedRoomId] = useState();
 
+  const [selectedRoomId, setSelectedRoomId] = useState();
+  
   // Função para filtrar os agendamentos pela hora selecionada
   const getFilteredSchedules = () => {
     return schedules.filter((schedule) => schedule.time === horario);
@@ -75,7 +76,6 @@ function Rooms() {
     return availableRooms;
   };
   
-
   const isTimeWithinNextThreeHours = (scheduleTime, selectedTime) => {
     const [scheduleHour] = scheduleTime.split(":").map(Number);
     const [selectedHour] = selectedTime.split(":").map(Number);
@@ -99,6 +99,8 @@ function Rooms() {
   };
 
   const sendWhatsAppMessage = (Schedule) => {
+    if (!Schedule) return;
+    
     const { roomId, date, time, lawyerId, type } = Schedule;
     const roomNumber = roomId.number;
     const dateFormatted = new Date(date).toLocaleDateString('pt-BR'); 
@@ -121,7 +123,8 @@ function Rooms() {
 
     const whatsappNumber = `+55${number}`; // Formato do número do WhatsApp
     const encodedMessage = encodeURIComponent(message);
-    const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+    const whatsappLink = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMessage}`;
+
 
     window.open(whatsappLink, "_blank"); // Abre o WhatsApp
 };
@@ -322,8 +325,6 @@ function Rooms() {
       );
     });
   };
-
-  
 
   if (loading) return <Typography>Carregando...</Typography>;
   if (error) return <Typography color="red">{error}</Typography>;

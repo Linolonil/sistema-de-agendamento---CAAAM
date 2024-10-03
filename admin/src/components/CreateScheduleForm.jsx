@@ -5,7 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { ptBR } from "date-fns/locale";
 import ScheduleContext from "../context/SchedulesContext";
 import { PropTypes } from "prop-types";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 
 const getCurrentDateAndHour = (date) => {
   const year = date.getFullYear();
@@ -29,12 +29,15 @@ const CreateScheduleForm = () => {
     tipoAgendamento,
     setTipoAgendamento,
   } = useContext(ScheduleContext);
+  
+  const [loading, setLoading] = useState(false); // Estado de carregamento
 
   const handleDateChange = (date) => {
     setDate(date);
     const formattedDate = getCurrentDateAndHour(date);
     updateDate(formattedDate, horario);
   };
+
   const handleHorarioChange = (e) => {
     const selectedHorario = e;
     setHorario(selectedHorario);
@@ -60,6 +63,7 @@ const CreateScheduleForm = () => {
     }
 
     try {
+      setLoading(true); // Ativa o estado de carregamento
       const response = await createSchedule({
         date: formattedDate,
         hour: horario,
@@ -68,60 +72,63 @@ const CreateScheduleForm = () => {
         userId,
         type: tipoAgendamento,
       });
+      toast.success("Agendamento criado com sucesso!"); // Notificação de sucesso
       return response;
     } catch (error) {
       console.log(error);
       toast.error("Erro ao criar agendamento!");
       return;
+    } finally {
+      setLoading(false); // Desativa o estado de carregamento
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="p-1 mt-3 h-full w-full ">
-        <div className="mb-4 ">
-          <Typography variant="h6" className="text-gray-900">
-            Data
-          </Typography>
-          <DatePicker
-            selected={date}
-            onChange={handleDateChange}
-            dateFormat="dd/MM/yyyy"
-            minDate={new Date()}
-            className=" w-full mt-2 bg-gray-300   text-gray-900 text-center text-xl py-2 rounded"
-            locale={ptBR}
-            required
-          />
-        </div>
+      <div className="mb-4 ">
+        <Typography variant="h6" className="text-gray-900">
+          Data
+        </Typography>
+        <DatePicker
+          selected={date}
+          onChange={handleDateChange}
+          dateFormat="dd/MM/yyyy"
+          minDate={new Date()}
+          className="w-full mt-2 bg-gray-300 text-gray-900 text-center text-xl py-2 rounded"
+          locale={ptBR}
+          required
+        />
+      </div>
 
-        <div className="mb-4">
-          <Typography variant="h6" className="text-black">
-            Hora
-          </Typography>
-          <select
-            value={horario}
-            onChange={(e) => handleHorarioChange(e.target.value)}
-            className=" w-full mt-2 bg-gray-300   text-gray-900 text-center text-xl py-2 rounded"
-            required
-          >
-            {[
-              "8:00",
-              "9:00",
-              "10:00",
-              "11:00",
-              "12:00",
-              "13:00",
-              "14:00",
-              "15:00",
-              "16:00",
-              "17:00",
-            ].map((time) => (
-              <option key={time} value={time}>
-                {time}
-              </option>
-            ))}
-          </select>
-        </div>
- 
+      <div className="mb-4">
+        <Typography variant="h6" className="text-black">
+          Hora
+        </Typography>
+        <select
+          value={horario}
+          onChange={(e) => handleHorarioChange(e.target.value)}
+          className="w-full mt-2 bg-gray-300 text-gray-900 text-center text-xl py-2 rounded"
+          required
+        >
+          {[
+            "8:00",
+            "9:00",
+            "10:00",
+            "11:00",
+            "12:00",
+            "13:00",
+            "14:00",
+            "15:00",
+            "16:00",
+            "17:00",
+          ].map((time) => (
+            <option key={time} value={time}>
+              {time}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div className="mb-4">
         <Typography variant="h6" className="text-black">
           Tipo de Agendamento
@@ -146,17 +153,21 @@ const CreateScheduleForm = () => {
 
       <Button
         type="submit"
-        disabled={!lawyer}
-        className="mt-4  w-full bg-green-600 hover:bg-green-700 "
+        disabled={!lawyer || loading} // Desabilita o botão se o advogado não estiver presente ou durante o loading
+        className="mt-4 w-full bg-green-600 hover:bg-green-700 "
       >
-        Agendar
+        {loading ? (
+          <span className="animate-spin">Loading...</span>
+        ) : (
+          "Agendar"
+        )}
       </Button>
     </form>
   );
 };
 
 CreateScheduleForm.propTypes = {
-  handleCreateUser: PropTypes.func.isRequired,
+  handleCreateUser: PropTypes.func,
 };
 
 export default CreateScheduleForm;
