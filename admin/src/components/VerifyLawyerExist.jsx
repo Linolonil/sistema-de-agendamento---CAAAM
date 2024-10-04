@@ -11,7 +11,7 @@ import {
 import { useContext, useState } from "react";
 import ScheduleContext from "../context/SchedulesContext";
 import { toast } from "react-toastify";
-import api from "../../services/api";
+import api from "../services/api";
 
 function VerifyLawyerExist() {
   const {

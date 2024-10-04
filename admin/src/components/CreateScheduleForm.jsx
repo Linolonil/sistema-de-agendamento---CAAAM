@@ -79,12 +79,13 @@ const CreateScheduleForm = () => {
       toast.error("Erro ao criar agendamento!");
       return;
     } finally {
-      setLoading(false); // Desativa o estado de carregamento
+      setLoading(false);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="p-1 mt-3 h-full w-full ">
+      <div className="w-full h-full overflow-hidden p-1">
       <div className="mb-4 ">
         <Typography variant="h6" className="text-gray-900">
           Data
@@ -162,6 +163,7 @@ const CreateScheduleForm = () => {
           "Agendar"
         )}
       </Button>
+      </div>
     </form>
   );
 };

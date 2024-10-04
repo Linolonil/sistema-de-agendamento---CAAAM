@@ -19,7 +19,6 @@ import {
   ChatBubbleLeftEllipsisIcon,
   Bars3Icon,
   XMarkIcon,
-  Cog6ToothIcon,
   
 } from "@heroicons/react/24/solid";
 

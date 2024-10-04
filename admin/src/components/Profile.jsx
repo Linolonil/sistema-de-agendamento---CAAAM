@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { toast } from "react-toastify";
 import { Card, Input, Button, Typography } from "@material-tailwind/react";
-import api from "../../services/api";
+import api from "../services/api";
 import { AuthContext } from './../context/AuthContext';
 import { PropTypes } from 'prop-types';
 

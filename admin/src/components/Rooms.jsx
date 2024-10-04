@@ -131,8 +131,8 @@ function Rooms() {
 
   const renderRooms = () => {
     const availableRooms =
-      tipoAgendamento === "hearing" ? getRoomsAvailableForHearing() : rooms; // Se for audiência, exibe apenas as disponíveis
-    const filteredSchedules = getFilteredSchedules(); // Obtém os agendamentos filtrados
+      tipoAgendamento === "hearing" ? getRoomsAvailableForHearing() : rooms; 
+    const filteredSchedules = getFilteredSchedules(); 
 
     return availableRooms.map((room) => {
       const schedule = filteredSchedules.find(
@@ -156,7 +156,6 @@ function Rooms() {
               }`}
               onClick={(e) => {
                 e.stopPropagation();
-                // Aqui, você deve verificar se o agendamento existe antes de tentar confirmar
                 if (schedule) {
                   handleConfirm(schedule._id);
                 }
@@ -326,12 +325,19 @@ function Rooms() {
     });
   };
 
-  if (loading) return <Typography>Carregando...</Typography>;
-  if (error) return <Typography color="red">{error}</Typography>;
+  if (error) return <Typography color="red">{error}</Typography>; 
 
   return (
-    <Card className="h-full w-full overflow-auto bg-dark p-4">
-      <table className="w-full overflow-hidden h-full table-auto text-center border-collapse">
+    <Card className="h-full w-full overflow-auto bg-dark  ">
+       {loading ? (
+                <div className="w-full  flex justify-center items-center h-full "> 
+                  <Button loading={true} size="lg" className="size-full text-2xl  flex justify-center items-center">
+                    Carregando...
+                  </Button>
+                  </div>
+               
+          ) : (
+      <table className="w-full h-full table-auto text-center border-collapse ">
         <thead className="text-center">
           <tr>
             {TABLE_HEAD.map((head) => (
@@ -350,10 +356,14 @@ function Rooms() {
             ))}
           </tr>
         </thead>
-        <tbody>{renderRooms()}</tbody>
+        <tbody className="text-center">
+          {renderRooms()}
+        </tbody>
       </table>
+    )}
     </Card>
   );
+  
 }
 
 export default Rooms;

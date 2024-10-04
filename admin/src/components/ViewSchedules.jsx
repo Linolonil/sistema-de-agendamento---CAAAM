@@ -27,7 +27,9 @@ function ViewSchedules() {
     updateDate,
     horario,
     deleteSchedule,
+    loading, // Certifique-se de que loading é um valor vindo do contexto
   } = useContext(ScheduleContext);
+  
   const handleDateChange = (date) => {
     setDate(date);
     const formattedDate = getCurrentDateAndHour(date);
@@ -52,15 +54,16 @@ function ViewSchedules() {
   const dateNow = new Date();
   const hourNow = dateNow.getHours();
 
-  return (
+  // Renderiza a tabela com os horários
+  const renderScheduleTable = () => (
     <div className="overflow-auto">
-      <div className="w-full  flex justify-center items-center gap-4 mb-1 ">
+      <div className="w-full flex justify-center items-center gap-4 mb-1">
         <DatePicker
           selected={date}
           onChange={handleDateChange}
           dateFormat="dd/MM/yyyy"
           minDate={new Date()}
-          className="w-full   mt-2 bg-gray-900 text-gray-100 text-center text-xl py-2 rounded"
+          className="w-full mt-2 bg-gray-900 text-gray-100 text-center text-xl py-2 rounded"
           locale={ptBR}
           required
         />
@@ -79,7 +82,7 @@ function ViewSchedules() {
           <tr>
             <th className="border border-gray-400 p-2">Hora</th>
             {rooms.map((room) => (
-              <th key={room._id} className={`border border-gray-400 p-2 `}>
+              <th key={room._id} className={`border border-gray-400 p-2`}>
                 Sala {room.number}
               </th>
             ))}
@@ -92,7 +95,7 @@ function ViewSchedules() {
               <tr key={hour}>
                 <td
                   className={`border border-gray-400 p-3 text-center ${
-                    isCurrentHour ? "border-t-4 border-t-yellow-800" : "" // Adiciona borda superior amarela se for a hora atual
+                    isCurrentHour ? "border-t-4 border-t-yellow-800" : ""
                   }`}
                 >
                   {hour}
@@ -113,7 +116,7 @@ function ViewSchedules() {
                           ? "bg-red-700"
                           : "bg-gray-900"
                       } border border-gray-400 p-2 text-center ${
-                        isCurrentHour ? "border-t-4 border-t-yellow-800" : "" // Adiciona borda superior amarela se for a hora atual
+                        isCurrentHour ? "border-t-4 border-t-yellow-800" : ""
                       }`}
                     >
                       {schedule ? (
@@ -126,78 +129,46 @@ function ViewSchedules() {
                                   : "bg-gray-900"
                               } hover:bg-gray-700 text-white text-sm font-bold py-2 px-4 rounded-lg`}
                             >
-                              {schedule
-                                ? schedule?.lawyerId.name.split(" ")[0]
-                                : "Selecionar Advogado"}
+                              {schedule?.lawyerId.name.split(" ")[0]}
                             </Button>
                           </PopoverHandler>
                           <PopoverContent className="p-4 bg-gray-800 text-white rounded-lg shadow-lg">
                             <div className="mb-2">
-                              <Typography
-                                variant="h5"
-                                className="text-gray-400"
-                              >
-                                {schedule
-                                  ? schedule.type === "meeting"
-                                    ? "Reunião"
-                                    : "Audiência"
-                                  : "N/A"}
+                              <Typography variant="h5" className="text-gray-400">
+                                {schedule.type === "meeting"
+                                  ? "Reunião"
+                                  : "Audiência"}
                               </Typography>
                             </div>
 
                             <hr className="my-2 border-gray-600" />
 
                             <div className="mb-2">
-                              <Typography
-                                variant="h6"
-                                className="font-medium"
-                              >
+                              <Typography variant="h6" className="font-medium">
                                 Advogado:
                               </Typography>
-                              <Typography
-                                variant="small"
-                                className="text-gray-400"
-                              >
-                                Id: {schedule ? schedule?.lawyerId._id : "N/A"}
+                              <Typography variant="small" className="text-gray-400">
+                                Id: {schedule?.lawyerId._id}
                               </Typography>
-                              <Typography
-                                variant="small"
-                                className="text-gray-400"
-                              >
-                                Nome:{" "}
-                                {schedule ? schedule?.lawyerId.name : "N/A"}
+                              <Typography variant="small" className="text-gray-400">
+                                Nome: {schedule?.lawyerId.name}
                               </Typography>
-                              <Typography
-                                variant="small"
-                                className="text-gray-400"
-                              >
-                                OAB: {schedule ? schedule?.lawyerId.oab : "N/A"}
+                              <Typography variant="small" className="text-gray-400">
+                                OAB: {schedule?.lawyerId.oab}
                               </Typography>
-                              <Typography
-                                variant="small"
-                                className="text-gray-400"
-                              >
-                                Telefone:{" "}
-                                {schedule
-                                  ? schedule?.lawyerId.phoneNumber
-                                  : "N/A"}
+                              <Typography variant="small" className="text-gray-400">
+                                Telefone: {schedule?.lawyerId.phoneNumber}
                               </Typography>
                             </div>
 
                             <hr className="my-2 border-gray-600" />
 
                             <div className="mb-2">
-                              <Typography
-                                variant="h6"
-                                className="font-medium"
-                              >
+                              <Typography variant="h6" className="font-medium">
                                 Usuário:
                               </Typography>
-                              <Typography
-                                variant="small"
-                                className="text-gray-400"
-                              >
-                                {schedule ? schedule?.userId.name : "N/A"}
+                              <Typography variant="small" className="text-gray-400">
+                                {schedule?.userId.name}
                               </Typography>
                             </div>
                             <div className="border-t border-gray-600 p-2 text-center mx-auto">
@@ -230,6 +201,19 @@ function ViewSchedules() {
           })}
         </tbody>
       </table>
+    </div>
+  );
+
+  // Renderiza o conteúdo
+  return (
+    <div className="w-full flex justify-center items-center h-full">
+      {loading ? (
+        <Button loading={true} size="lg" className="text-2xl flex justify-center items-center">
+          Carregando...
+        </Button>
+      ) : (
+        renderScheduleTable()
+      )}
     </div>
   );
 }

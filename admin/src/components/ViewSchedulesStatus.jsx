@@ -8,7 +8,7 @@ import {
   MenuItem,
 } from "@material-tailwind/react";
 import {  ChevronUpIcon, DownloadIcon } from "lucide-react";
-import api from '../../services/api';
+import api from '../services/api';
 import { useEffect, useState } from "react";
 import { PropTypes } from 'prop-types';
 

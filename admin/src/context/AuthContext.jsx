@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // Use useNavigate para redirecionar
 import { PropTypes } from 'prop-types';
-import api from './../../services/api';
+import api from './../services/api';
 import { toast } from "react-toastify";
 import axios from "axios";
 
@@ -9,6 +9,7 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate(); // Hook para navegação
 
   useEffect(() => {
@@ -29,6 +30,7 @@ export const AuthProvider = ({ children }) => {
   }, [navigate]);
 
   const SignIn = async ({ userName, password }) => {
+    setLoading(true);
     try {
       const response = await api.post("/api/v1/auth/login", {
         userName,
@@ -63,6 +65,9 @@ export const AuthProvider = ({ children }) => {
         draggable: true,
         progress: undefined,
       });
+      setLoading(false);
+    }finally {
+      setLoading(false);
     }
   };
 
@@ -120,6 +125,7 @@ export const AuthProvider = ({ children }) => {
     SignIn,
     SignOut,
     CreateUser,
+    loading
   };
 
   return (

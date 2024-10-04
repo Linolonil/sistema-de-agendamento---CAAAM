@@ -1,19 +1,19 @@
 import { useContext, useRef } from "react";
 import { AuthContext } from "../../context/AuthContext";
-import bg from '../../assets/image/bg/bg-login.gif';
-import logo from '../../assets/image/logocaaam.png';
+import bg from "../../assets/image/bg/bg-login.gif";
+import logo from "../../assets/image/logocaaam.png";
 import { Navigate } from "react-router-dom";
+import { Button } from "@material-tailwind/react";
 
 const Login = () => {
-
-  const { SignIn, signed } = useContext(AuthContext);
-  const usernameRef = useRef(null);  
-  const passwordRef = useRef(null); 
+  const { SignIn, signed, loading } = useContext(AuthContext);
+  const usernameRef = useRef(null);
+  const passwordRef = useRef(null);
 
   const handleSignIn = async (e) => {
     e.preventDefault();
     const data = {
-      userName: usernameRef.current.value, 
+      userName: usernameRef.current.value,
       password: passwordRef.current.value,
     };
     await SignIn(data);
@@ -31,9 +31,15 @@ const Login = () => {
       <div className="flex flex-col md:flex-row items-center justify-center bg-black bg-opacity-70 p-10 rounded-lg shadow-lg max-w-5xl w-full">
         {/* Left Section: Welcome Message */}
         <div className="hidden h-[26.5rem] md:flex flex-col items-start justify-center w-full md:w-1/2 p-8 text-white space-y-6 relative">
-          <img src={logo} alt="logo" className=" h-20 w-auto absolute top-4 left-32 bg-opacity-10" />
+          <img
+            src={logo}
+            alt="logo"
+            className=" h-20 w-auto absolute top-4 left-32 bg-opacity-10"
+          />
           <div className="p-3">
-            <h1 className="text-4xl font-bold">Bem-vindo ao sistema de agendamento</h1>
+            <h1 className="text-4xl font-bold">
+              Bem-vindo ao sistema de agendamento
+            </h1>
             <p className="text-gray-300 mt-10">
               Gerencie os agendamentos das salas de maneira fácil e prática.
             </p>
@@ -51,7 +57,7 @@ const Login = () => {
                 Nome de usuário
               </label>
               <input
-                ref={usernameRef}  // Associa o useRef ao input de username
+                ref={usernameRef} // Associa o useRef ao input de username
                 type="text"
                 id="username"
                 required
@@ -67,7 +73,7 @@ const Login = () => {
                 Senha
               </label>
               <input
-                ref={passwordRef}  // Associa o useRef ao input de password
+                ref={passwordRef} // Associa o useRef ao input de password
                 type="password"
                 id="password"
                 required
@@ -75,13 +81,15 @@ const Login = () => {
                 className="w-full px-4 py-3 mt-1 bg-gray-700 text-white rounded focus:outline-none focus:ring focus:ring-blue-500"
               />
             </div>
-            <button
+            
+            <Button
+              loading={loading}
               type="submit"
-              className="w-full px-4 py-3 font-semibold text-white bg-light-blue-700 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition duration-200"
+              className="w-full px-4 py-3 font-semibold text-white flex justify-center items-center text-center bg-light-blue-700 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition duration-200"
             >
               Entrar
-            </button>
-           
+            </Button>
+            
           </form>
         </div>
       </div>
