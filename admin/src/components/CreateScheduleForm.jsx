@@ -154,7 +154,7 @@ const CreateScheduleForm = () => {
 
       <Button
         type="submit"
-        disabled={!lawyer || loading} // Desabilita o botão se o advogado não estiver presente ou durante o loading
+        disabled={!lawyer || loading} 
         className="mt-4 w-full bg-green-600 hover:bg-green-700 "
       >
         {loading ? (

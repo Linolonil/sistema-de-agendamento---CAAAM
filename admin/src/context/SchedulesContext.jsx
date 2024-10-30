@@ -9,7 +9,7 @@ import  {
   fetchAllRooms,
   fetchAllSchedules,
   getLawyer,
-} from "../services/api";
+} from "../services/apiSchedules.js";
 
 export const ScheduleContext = createContext();
 
@@ -245,7 +245,6 @@ export const ScheduleProvider = ({ children }) => {
     }
   };
   
-
   // exclui um agendamento
   const deleteSchedule = async (scheduleId) => {
     setLoading(true);
@@ -258,6 +257,7 @@ export const ScheduleProvider = ({ children }) => {
       const response = await deleteScheduleById(scheduleId);
       if (response.status === 200) {
         fetchSchedules(selectedDate);
+        return
       } else {
         setError("Erro ao excluir agendamento!");
         setLoading(false);

@@ -1,28 +1,29 @@
 import { createContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // Use useNavigate para redirecionar
-import { PropTypes } from 'prop-types';
-import api from './../services/api';
+import { PropTypes } from "prop-types";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { login, register, validateTokenUser } from "../services/apiAuth";
+import api from "../services/api";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // Hook para navegação
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadingStoreData = async () => {
       const storedUser = localStorage.getItem("@Auth:user");
       const token = localStorage.getItem("@Auth:token");
-
-      if (token && storedUser) {
+      const response = await validateTokenUser(token);
+      
+      if (token && storedUser && response.valid) {
         setUser(JSON.parse(storedUser));
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
-        navigate("/admin"); // Corrigido para redirecionar sem JSX
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        navigate("/admin");
       }
     };
 
@@ -32,7 +33,7 @@ export const AuthProvider = ({ children }) => {
   const SignIn = async ({ userName, password }) => {
     setLoading(true);
     try {
-      const response = await api.post("/api/v1/auth/login", {
+      const response = await login({
         userName,
         password,
       });
@@ -41,7 +42,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem("@Auth:token", response.data.token);
         setUser(response.data.user);
         const userName = response.data.user.name;
-        
+
         toast.success(`Bem-vindo, ${userName}!`, {
           position: "top-right",
           autoClose: 3000,
@@ -51,7 +52,7 @@ export const AuthProvider = ({ children }) => {
           draggable: true,
           progress: undefined,
         });
-        
+
         navigate("/admin"); // Navegação após login com sucesso
       }
     } catch (error) {
@@ -66,7 +67,7 @@ export const AuthProvider = ({ children }) => {
         progress: undefined,
       });
       setLoading(false);
-    }finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -89,7 +90,7 @@ export const AuthProvider = ({ children }) => {
 
   const CreateUser = async ({ name, role, password }) => {
     try {
-      const response = await api.post("api/v1/auth/register", {
+      const response = await register({
         name,
         role,
         password,
@@ -125,14 +126,10 @@ export const AuthProvider = ({ children }) => {
     SignIn,
     SignOut,
     CreateUser,
-    loading
+    loading,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 AuthProvider.propTypes = {

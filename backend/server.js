@@ -4,8 +4,10 @@ import dotenv from  'dotenv';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import reportRoutes from './routes/reportRoutes.js';
 import scheduleRoutes from './routes/scheduleRoutes.js';
 import lawyerRoutes from './routes/lawyerRoutes.js';
+import validadeTokenUser from './routes/validateToken.js';
 import roomRoutes from './routes/roomRoutes.js';
 
 const app = express();
@@ -25,7 +27,9 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/images', express.static('uploads'));
 app.use('/api/v1/lawyer', lawyerRoutes);
+app.use('/api/v1/auth/validate-token', validadeTokenUser);
 app.use('/api/v1/room', roomRoutes);
+app.use('/api', reportRoutes);
 app.use('/api/v1/schedules', scheduleRoutes);
 
 

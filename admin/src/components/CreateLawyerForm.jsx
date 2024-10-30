@@ -34,7 +34,7 @@ const CreateLawyerForm = ( ) => {
     try {
       const response = await createLawyer(name, oab, phoneNumber);
       if (response.success) {
-        setLawyer(response.lawyer._id);
+        setLawyer(response.lawyer._id); 
         toast.success("Advogado cadastrado com sucesso!");
         
         // Limpa os campos de input
@@ -63,7 +63,7 @@ const CreateLawyerForm = ( ) => {
             type="text"
             size="lg"
             name="name"
-            value={lawyerData.name}
+            value={lawyerData?.name}
             onChange={handleChange}
             placeholder="Nome do Advogado"
             required
@@ -77,7 +77,7 @@ const CreateLawyerForm = ( ) => {
             type="text"
             size="lg"
             name="oab"
-            value={lawyerData.oab}
+            value={lawyerData?.oab}
             onChange={handleChange}
             placeholder="Informe a OAB"
             required
@@ -91,7 +91,7 @@ const CreateLawyerForm = ( ) => {
             type="tel"
             size="lg"
             name="phoneNumber"
-            value={lawyerData.phoneNumber}
+            value={lawyerData?.phoneNumber}
             onChange={handleChange}
             placeholder="Ex: 9299887766"
             required

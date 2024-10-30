@@ -61,6 +61,7 @@ const Login = () => {
                 type="text"
                 id="username"
                 required
+                autoComplete="username"
                 placeholder="Digite seu nome de usuário"
                 className="w-full px-4 py-3 mt-1 bg-gray-700 text-white rounded focus:outline-none focus:ring focus:ring-blue-500"
               />
@@ -76,6 +77,7 @@ const Login = () => {
                 ref={passwordRef} // Associa o useRef ao input de password
                 type="password"
                 id="password"
+                autoComplete="current-password"
                 required
                 placeholder="Digite sua senha"
                 className="w-full px-4 py-3 mt-1 bg-gray-700 text-white rounded focus:outline-none focus:ring focus:ring-blue-500"

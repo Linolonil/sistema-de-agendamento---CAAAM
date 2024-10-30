@@ -33,6 +33,7 @@ import CreateSchedules from "../../components/CreateSchedules";
 import ViewSchedules from "../../components/ViewSchedules";
 import { BookA, ChevronRightIcon, UserCircleIcon, UserCog } from "lucide-react";
 import ViewSchedulesStatus from "../../components/ViewSchedulesStatus";
+import Report from "../../components/Report";
 
 const Admin = () => {
   const [activeSection, setActiveSection] = useState(null);
@@ -76,7 +77,7 @@ const Admin = () => {
   };
 
   return (
-    <div className="h-screen w-full bg-gray-800 flex justify-center items-center p-2 gap-2">
+    <div className=" h-screen w-full bg-gray-800 flex justify-center items-center p-2 gap-2">
       <IconButton variant="text" color="white" size="lg" onClick={openDrawer} >
         {isDrawerOpen ? (
           <XMarkIcon className="h-full w-8 stroke-2" />
@@ -201,6 +202,13 @@ const Admin = () => {
               
               <AccordionBody className="py-1">
                 <List className="p-0">
+                  <ListItem onClick={() => setActiveSection("report")}
+                  >
+                    <ListItemPrefix>
+                      <ChevronRightIcon strokeWidth={3} className="h-3 w-5" />
+                    </ListItemPrefix>
+                    relatorio mensal
+                  </ListItem>
                   <ListItem onClick={() => setActiveSection("create-schedule")}
                   >
                     <ListItemPrefix>
@@ -256,6 +264,7 @@ const Admin = () => {
       <Card className="h-full w-full mx-auto " color="gray">
         {activeSection === "profile" && <Profile user={user} />}
         {activeSection === "create-schedule" && <CreateSchedules />}
+        {activeSection === "report" && <Report/>}
         {activeSection === "view-schedules" && <ViewSchedules />}
         {activeSection === "view-schedules-status" && <ViewSchedulesStatus />}
         {!activeSection && (

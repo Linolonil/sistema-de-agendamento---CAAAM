@@ -1,4 +1,3 @@
-
 import {
   Card,
   CardBody,
@@ -8,7 +7,7 @@ import {
   MenuItem,
 } from "@material-tailwind/react";
 import {  ChevronUpIcon, DownloadIcon } from "lucide-react";
-import api from '../services/api';
+import  {  infoSchedules } from '../services/apiSchedules.js';
 import { useEffect, useState } from "react";
 import { PropTypes } from 'prop-types';
 
@@ -36,10 +35,11 @@ function ViewSchedulesStatus() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await api.get('/api/v1/schedules/data');
-        const { totalAgendamentos, totalAdvogadosCadastrados, totalMeetings, totalHearings } = response.data;
+        const token = localStorage.getItem("@Auth:token");
+        const response  = await infoSchedules(token);
+        const { totalAgendamentos, totalAdvogadosCadastrados, totalMeetings, adjustedTotalHearings } = response;
+        let totalHearings = adjustedTotalHearings
 
-        // Definindo os KPIs
         setKpiData([
           {
             title: "Agendamentos",

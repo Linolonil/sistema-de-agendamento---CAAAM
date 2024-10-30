@@ -264,11 +264,6 @@ const getAll = async (req, res) => {
     const start = startOfMonth(new Date());
     const end = endOfMonth(new Date());
 
-    // Contar o total de agendamentos do dia atual
-    const totalAgendamentos = await Schedule.countDocuments({
-      date: { $gte: start, $lte: end }, // Contar agendamentos do mês atual
-    });
-
     // Contar o total de advogados
     const totalAdvogadosCadastrados = await Lawyer.countDocuments();
 
@@ -277,6 +272,13 @@ const getAll = async (req, res) => {
 
     // Contar o total de audiências
     const totalHearings = await Schedule.countDocuments({ type: 'hearing' });
+
+    // Calcular o total de audiências ajustado (dividido por 3)
+    const adjustedTotalHearings = Math.floor(totalHearings / 3);
+    
+    // Calcular o total de agendamentos como a soma de reuniões e audiências ajustadas
+    const totalAgendamentos = totalMeetings + adjustedTotalHearings;
+    console.log(totalAgendamentos)
 
     // Buscar total de agendamentos por mês
     const monthlyAgendamentos = await Schedule.aggregate([
@@ -299,7 +301,7 @@ const getAll = async (req, res) => {
       totalAgendamentos,
       totalAdvogadosCadastrados,
       totalMeetings,
-      totalHearings,
+      adjustedTotalHearings, // Use o total ajustado de audiências
       monthlyAgendamentos, 
     });
   } catch (error) {
@@ -307,6 +309,10 @@ const getAll = async (req, res) => {
     res.status(500).json({ message: 'Erro ao buscar os dados' });
   }
 };
+
+
+
+
 
 
 export default {
