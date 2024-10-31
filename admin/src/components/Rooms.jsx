@@ -1,7 +1,6 @@
 import { useContext, useState } from "react";
 import {
   Button,
-  Card,
   Popover,
   PopoverContent,
   PopoverHandler,
@@ -24,7 +23,7 @@ const TABLE_HEAD = [
   "OAB",
   "Tipo",
   "Status da Sala",
-  "Whatsaap",
+  "WhatsApp",
   "Excluir",
 ];
 
@@ -33,54 +32,19 @@ function Rooms() {
     rooms,
     schedules,
     confirmSchedule,
-    loading,
     setRoomId,
     deleteSchedule,
     changeRoomState,
-    tipoAgendamento,
     horario,
   } = useContext(ScheduleContext);
 
   const [selectedRoomId, setSelectedRoomId] = useState();
-  
+
   // Função para filtrar os agendamentos pela hora selecionada
   const getFilteredSchedules = () => {
-    return schedules.filter((schedule) => schedule.time === horario);
-  };
-
-  const getRoomsAvailableForHearing = () => {
-    const selectedTime = horario; // Hora selecionada
-    const unavailableRooms = ['66f32a07b0a8fbb2cdf4e257', '66f32a07b0a8fbb2cdf4e265']; // IDs das salas que nunca devem estar disponíveis
-  
-    const availableRooms = rooms.filter((room) => {
-      // Verifica se a sala está ocupada nos próximos 3 horários
-      const isRoomOccupied = schedules.some((schedule) => {
-        const scheduleTime = schedule.time; 
-        const roomId = schedule.roomId._id;
-  
-        // Verifica se a sala corresponde à sala atual e se está dentro do intervalo de tempo
-        const isSameRoom = roomId === room._id;
-        const isWithinNextThreeHours = isTimeWithinNextThreeHours(
-          scheduleTime,
-          selectedTime
-        );
-  
-        return isSameRoom && isWithinNextThreeHours;
-      });
-  
-      // Retorna true se a sala NÃO estiver ocupada e se não for uma sala indisponível
-      return !isRoomOccupied && !unavailableRooms.includes(room._id);
-    });
-  
-    return availableRooms;
-  };
-  
-  const isTimeWithinNextThreeHours = (scheduleTime, selectedTime) => {
-    const [scheduleHour] = scheduleTime.split(":").map(Number);
-    const [selectedHour] = selectedTime.split(":").map(Number);
-
-    // Verifica se o horário está no intervalo de 3 horas
-    return scheduleHour >= selectedHour && scheduleHour < selectedHour + 3;
+    const filteredSchedules =schedules.filter((schedule) => schedule.time === horario);
+    console.log(schedules.filter((schedule) => schedule.time === horario))
+    return filteredSchedules
   };
 
   const handleConfirm = (roomId) => {
@@ -97,24 +61,23 @@ function Rooms() {
     }
   };
 
-  const sendWhatsAppMessage = (Schedule) => {
-    if (!Schedule) return;
+  const sendWhatsAppMessage = (schedule) => {
+    if (!schedule) return;
     
-    const { roomId, date, time, lawyerId, type } = Schedule;
+    const { roomId, date, originHour, time, endTime, lawyerId, type } = schedule;
     const roomNumber = roomId.number;
     const dateFormatted = new Date(date).toLocaleDateString('pt-BR'); 
-    const startTime = time.split(":")[0]; 
-    const endTime = Number(startTime) + 1;
+    const startTime = originHour.split(":")[0]; 
+    const startTimeMeeting = time
     const maxPeople = roomId.capacity; 
     const number = lawyerId.phoneNumber;
-
 
     let message = "";
 
     if (type === "meeting") {
-        message = `Confirmado agendamento para reunião na Sala: ${roomNumber}.\nData: ${dateFormatted}.\nHorário: ${startTime}:00 - ${endTime}:00.\nNúmero máximo de pessoas: ${maxPeople}.\nTolerância de 15 minutos, após o prazo a sala será disponibilizada para novo atendimento (em caso de atraso, avisar imediatamente o atendimento).`;
+        message = `Confirmado agendamento para reunião na Sala: ${roomNumber}.\nData: ${dateFormatted}.\nHorário: ${startTimeMeeting}:00 - ${endTime}:00.\nNúmero máximo de pessoas: ${maxPeople}.\nTolerância de 15 minutos, após o prazo a sala será disponibilizada para novo atendimento (em caso de atraso, avisar imediatamente o atendimento).`;
     } else if (type === "hearing") {
-        message = `Confirmado agendamento para audiência na Sala: ${roomNumber}.\nData: ${dateFormatted}.\nHorário: ${startTime}:00 - ${endTime + 2}:00.\nNúmero máximo de pessoas: ${maxPeople}.\nTolerância de 15 minutos, após o prazo a sala será disponibilizada para novo atendimento (em caso de atraso, avisar imediatamente o atendimento).`;
+        message = `Confirmado agendamento para audiência na Sala: ${roomNumber}.\nData: ${dateFormatted}.\nHorário: ${startTime}:00 - ${endTime}.\nNúmero máximo de pessoas: ${maxPeople}.\nTolerância de 15 minutos, após o prazo a sala será disponibilizada para novo atendimento (em caso de atraso, avisar imediatamente o atendimento).`;
     } else {
         console.error("Tipo de agendamento inválido.");
         return;
@@ -124,39 +87,34 @@ function Rooms() {
     const encodedMessage = encodeURIComponent(message);
     const whatsappLink = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMessage}`;
 
-
     window.open(whatsappLink, "_blank"); // Abre o WhatsApp
-};
+  };
 
   const renderRooms = () => {
-    const availableRooms =
-      tipoAgendamento === "hearing" ? getRoomsAvailableForHearing() : rooms; 
-    const filteredSchedules = getFilteredSchedules(); 
-
-    return availableRooms.map((room) => {
-      const schedule = filteredSchedules.find(
-        (schedule) => schedule.roomId._id === room._id
-      );
-      
+    const filteredSchedules = getFilteredSchedules();
+    return rooms.map((room) => {
+      // Verifica se a sala está ocupada
+      const currentSchedule = filteredSchedules.find(schedule => schedule.roomId._id === room._id);
+      const isOccupied = !!currentSchedule;
       return (
         <tr
-        key={room._id}
-        onClick={() => handleRoomSelect(room._id)}
-        className={`cursor-pointer transition-colors duration-300 hover:bg-gray-700 ${
-          selectedRoomId === room._id ? "hover:bg-green-600 bg-green-500" : ""
-        }`}
+          key={room._id}
+          onClick={() => handleRoomSelect(room._id)}
+          className={`cursor-pointer transition-colors duration-300 hover:bg-gray-700 ${
+            selectedRoomId === room._id ? "hover:bg-green-600 bg-green-500" : ""
+          }`}
         >
           <td className="w-10 border-b border-gray-600 p-2 text-center mx-auto">
             <Button
               className={`flex justify-center items-center rounded-full w-10 h-10 text-white text-xl font-bold text-center ${
-                schedule && schedule.confirmed
-                  ? "bg-green-700 hover:bg-green-800"
-                  : "bg-gray-700 hover:bg-gray-600"
+                isOccupied
+                  ? "bg-gray-700 hover:bg-gray-600"
+                  : "bg-green-700 hover:bg-green-800"
               }`}
               onClick={(e) => {
                 e.stopPropagation();
-                if (schedule) {
-                  handleConfirm(schedule._id);
+                if (isOccupied) {
+                  handleConfirm(currentSchedule._id);
                 }
               }}
             >
@@ -167,42 +125,42 @@ function Rooms() {
           <td className="border-b border-gray-600 p-2 text-center mx-auto">
             <p
               className="font-bold overflow-hidden text-ellipsis whitespace-nowrap text-gray-200"
-              title={schedule ? schedule.lawyerId.name : ""}
+              title={isOccupied ? currentSchedule.lawyerId.name : "Disponível"}
             >
-              {schedule ? schedule.lawyerId.name.split(" ")[0] : "Disponível"}
+              {isOccupied ? currentSchedule.lawyerId.name.split(" ")[0] : "Disponível"}
             </p>
           </td>
 
           <td className="border-b border-gray-600 p-2 text-center mx-auto">
             <p className="font-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-[60px] text-gray-200">
-              {schedule ? schedule.lawyerId.oab : ""}
+              {isOccupied ? currentSchedule.lawyerId.oab : ""}
             </p>
           </td>
 
           <td className="border-b border-gray-600 p-2 text-center mx-auto">
             <p
               className={`rounded-full p-1 text-white ${
-                schedule?.type === "meeting"
+                isOccupied && currentSchedule.type === "meeting"
                   ? "bg-blue-500"
-                  : schedule?.type === "hearing"
+                  : isOccupied && currentSchedule.type === "hearing"
                   ? "bg-red-600"
                   : "bg-gray-500"
               }`}
             >
-              {schedule
-                ? schedule.type === "meeting"
+              {isOccupied
+                ? currentSchedule.type === "meeting"
                   ? "Reunião"
                   : "Audiência"
                 : ""}
             </p>
           </td>
-          {/* informations */}
-          <td className="border-b border-gray-600 p-2 text-center mx-auto relative" >
+
+          <td className="border-b border-gray-600 p-2 text-center mx-auto relative">
             <Popover>
               <PopoverHandler onClick={(e) => e.stopPropagation()}>
                 <Button
                   onClick={(e) => {
-                    e.stopPropagation(); // Impede que o clique se propague para a linha
+                    e.stopPropagation();
                   }}
                   className={`hover:bg-gray-700 text-white text-sm font-bold py-2 px-4 rounded-lg`}
                 >
@@ -211,13 +169,13 @@ function Rooms() {
               </PopoverHandler>
               <PopoverContent
                 className="p-4 bg-gray-900 text-white rounded-lg shadow-lg"
-                onClick={(e) => e.stopPropagation()} // Impede que o clique se propague ao conteúdo do popover
+                onClick={(e) => e.stopPropagation()}
               >
                 <div className="p-2 text-center mx-auto">
                   <div className="flex justify-center items-center gap-4">
                     <button
                       onClick={(e) => {
-                        e.stopPropagation(); // Impede que o clique se propague para a linha
+                        e.stopPropagation();
                         changeRoomState(
                           room._id,
                           room.hasAirConditioning,
@@ -235,7 +193,7 @@ function Rooms() {
 
                     <button
                       onClick={(e) => {
-                        e.stopPropagation(); // Impede que o clique se propague para a linha
+                        e.stopPropagation();
                         changeRoomState(
                           room._id,
                           !room.hasAirConditioning,
@@ -244,9 +202,7 @@ function Rooms() {
                         );
                       }}
                       className={`hover:text-amber-200 transition-colors ease-in-out duration-200 ${
-                        room.hasAirConditioning
-                          ? "text-gray-200"
-                          : "text-gray-800"
+                        room.hasAirConditioning ? "text-gray-200" : "text-gray-800"
                       }`}
                       title="Ar-Condicionado"
                     >
@@ -255,7 +211,7 @@ function Rooms() {
 
                     <button
                       onClick={(e) => {
-                        e.stopPropagation(); // Impede que o clique se propague para a linha
+                        e.stopPropagation();
                         changeRoomState(
                           room._id,
                           room.hasAirConditioning,
@@ -289,79 +245,49 @@ function Rooms() {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                sendWhatsAppMessage(schedule);
+                sendWhatsAppMessage(currentSchedule);
               }}
               className={`hover:text-amber-200 transition-colors ease-in-out duration-200`}
-              title="Computador"
+              title="Enviar mensagem"
             >
               <MailCheck />
             </button>
           </td>
 
           <td className="border-b border-gray-600 p-2 text-center mx-auto">
-            {schedule ? (
-              <Button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (
-                    window.confirm(
-                      "Você tem certeza que deseja excluir este agendamento?"
-                    )
-                  ) {
-                    deleteSchedule(schedule._id);
-                  }
-                }}
-                className="w-5 h-5 rounded-full relative bg-gray-900 shadow-none hover:text-white hover:scale-105 group"
-              >
-                <TrashIcon className="size-4 absolute bottom-1 left-4 text-red-600" />
-              </Button>
-            ) : (
-              ""
-            )}
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteSchedule(currentSchedule._id);
+              }}
+              disabled={!isOccupied}
+              className={`bg-red-600 hover:bg-red-500 text-white font-bold p-2 rounded-full transition-colors duration-200`}
+              title="Excluir Agendamento"
+            >
+              <TrashIcon />
+            </Button>
           </td>
         </tr>
       );
     });
   };
 
-
   return (
-    <Card className="h-full w-full overflow-auto bg-dark  ">
-       {loading ? (
-                <div className="w-full  flex justify-center items-center h-full "> 
-                  <Button loading={true} size="lg" className="size-full text-2xl  flex justify-center items-center">
-                    Carregando...
-                  </Button>
-                  </div>
-               
-          ) : (
-      <table className="w-full h-full table-auto text-center border-collapse ">
-        <thead className="text-center">
+    <div className="overflow-x-auto border border-gray-700 rounded-lg shadow-lg bg-gray-800">
+      <table className="w-full border-collapse bg-gray-800">
+        <thead>
           <tr>
             {TABLE_HEAD.map((head) => (
-              <th
-                key={head}
-                className="border-b bg-gray-900 p-4 text-center border-gray-700"
-              >
-                <Typography
-                  variant="small"
-                  color="white"
-                  className="font-bold leading-none opacity-70"
-                >
-                  {head}
-                </Typography>
+              <th key={head} className="border-b border-gray-600 p-4 text-left">
+                <Typography className="font-bold text-gray-200">{head}</Typography>
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="text-center">
-          {renderRooms()}
-        </tbody>
+        <tbody>{renderRooms()}</tbody>
       </table>
-    )}
-    </Card>
+    </div>
   );
-  
 }
 
 export default Rooms;

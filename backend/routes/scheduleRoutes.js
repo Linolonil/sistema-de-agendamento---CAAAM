@@ -11,7 +11,7 @@ router.post('/',authMiddleware, scheduleController.createSchedule);
 router.post('/new', scheduleController.newCreateSchedule);
 
 // todos os agendamentos
-router.get('/data',authMiddleware, scheduleController.getAll);
+router.post('/data',authMiddleware, scheduleController.getAll);
 
 // Listar todos os agendamentos
 router.get('/:date/:time', scheduleController.getAllSchedules);

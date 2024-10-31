@@ -72,6 +72,7 @@ const CreateScheduleForm = () => {
         userId,
         type: tipoAgendamento,
       });
+      
       toast.success("Agendamento criado com sucesso!"); // Notificação de sucesso
       return response;
     } catch (error) {
@@ -112,8 +113,8 @@ const CreateScheduleForm = () => {
           required
         >
           {[
-            "8:00",
-            "9:00",
+            "08:00",
+            "09:00",
             "10:00",
             "11:00",
             "12:00",

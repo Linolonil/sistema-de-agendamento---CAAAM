@@ -2,12 +2,14 @@ import Schedule from "../models/Schedule.js";
 import User from "../models/User.js";
 import Lawyer from "../models/Lawyer.js";
 import {
-    isValid,
+  isValid,
   startOfDay,
   endOfDay,
   startOfMonth,
   endOfMonth,
-  parseISO, isWeekend, addHours
+  parseISO,
+  isWeekend,
+  addHours,
 } from "date-fns";
 
 import Room from "../models/Room.js";
@@ -49,11 +51,9 @@ const createSchedule = async (req, res) => {
 
     // Verificar se o dia é válido
     if (isWeekend(parsedDate)) {
-      return res
-        .status(400)
-        .json({
-          message: "Agendamentos só podem ser feitos de segunda a sexta-feira.",
-        });
+      return res.status(400).json({
+        message: "Agendamentos só podem ser feitos de segunda a sexta-feira.",
+      });
     }
 
     // Obtém o advogado e o usuário
@@ -106,21 +106,19 @@ const createSchedule = async (req, res) => {
     }
 
     // Enviar a resposta de sucesso
-    res
-      .status(201)
-      .json({
-        success: true,
-        message:
-          type === "hearing"
-            ? "Audiência criada com sucesso"
-            : "Reunião criada com sucesso",
-      });
+    res.status(201).json({
+      success: true,
+      message:
+        type === "hearing"
+          ? "Audiência criada com sucesso"
+          : "Reunião criada com sucesso",
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// novo controller pra criar agendamentos (FUNCIONAL!) 
+// novo controller pra criar agendamentos (FUNCIONAL!)
 const newCreateSchedule = async (req, res) => {
   try {
     const { roomId, lawyerId, userId, date, time, type } = req.body;
@@ -130,6 +128,8 @@ const newCreateSchedule = async (req, res) => {
     // Verificar se o dia é válido (segunda a sexta)
     if (isWeekend(parsedDate)) {
       return res.status(400).json({
+        success: false,
+
         message: "Agendamentos só podem ser feitos de segunda a sexta-feira.",
       });
     }
@@ -137,17 +137,26 @@ const newCreateSchedule = async (req, res) => {
     // Verificar a disponibilidade da sala
     const room = await Room.findById(roomId);
     if (!room || !room.isAvailable) {
-      return res.status(400).json({ message: "A sala não está disponível para agendamento." });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "A sala não está disponível para agendamento.",
+        });
     }
 
     // Obter o advogado e o usuário
     const lawyer = await Lawyer.findById(lawyerId);
     if (!lawyer) {
-      return res.status(404).json({ message: "Advogado não encontrado" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Advogado não encontrado" });
     }
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: "Usuário não encontrado" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Usuário não encontrado" });
     }
 
     // Definir a duração com base no tipo
@@ -181,7 +190,9 @@ const newCreateSchedule = async (req, res) => {
 
     if (conflictingSchedules.length > 0) {
       return res.status(400).json({
-        message: "Conflito de horário: a sala está ocupada no horário solicitado.",
+        success: false,
+        message:
+          "Conflito de horário: a sala está ocupada no horário solicitado.",
       });
     }
 
@@ -203,7 +214,10 @@ const newCreateSchedule = async (req, res) => {
     // Enviar a resposta de sucesso
     res.status(201).json({
       success: true,
-      message: type === "hearing" ? "Audiência criada com sucesso" : "Reunião criada com sucesso",
+      message:
+        type === "hearing"
+          ? "Audiência criada com sucesso"
+          : "Reunião criada com sucesso",
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -355,7 +369,6 @@ const getSchedulesByDayAndHour = async (req, res) => {
         path: "userId",
         select: "name",
       });
-
     res.status(200).json({
       schedules,
     });
@@ -386,8 +399,7 @@ const confirmSchedule = async (req, res) => {
 };
 
 const getAll = async (req, res) => {
-  const { idUser } = req.body; 
- 
+  const { idUser } = req.body;
 
   try {
     // Definir o mês atual
@@ -407,7 +419,9 @@ const getAll = async (req, res) => {
     const totalAgendamentos = totalMeetings + totalHearings;
 
     // Contar agendamentos do usuário específico
-    const totalScheduleFromUser = await Schedule.countDocuments({ userId: idUser });
+    const totalScheduleFromUser = await Schedule.countDocuments({
+      userId: idUser,
+    });
 
     // Buscar total de agendamentos por mês
     const monthlyAgendamentos = await Schedule.aggregate([
@@ -431,15 +445,16 @@ const getAll = async (req, res) => {
       totalAdvogadosCadastrados,
       totalMeetings,
       totalHearings,
-      totalScheduleFromUser, // Incluindo o total de agendamentos do usuário
+      totalScheduleFromUser,
       monthlyAgendamentos,
     });
   } catch (error) {
     console.error("Erro ao buscar os dados:", error);
-    res.status(500).json({ message: "Erro ao buscar os dados", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Erro ao buscar os dados", error: error.message });
   }
 };
-
 
 export default {
   createSchedule,

@@ -268,7 +268,7 @@ const Admin = () => {
         {activeSection === "view-schedules" && <ViewSchedules />}
         {activeSection === "view-schedules-status" && <ViewSchedulesStatus />}
         {!activeSection && (
-          <ViewSchedulesStatus/>
+          <ViewSchedules/>
         )}
       </Card>
     </div>

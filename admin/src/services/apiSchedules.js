@@ -35,14 +35,17 @@ export const createNewSchedule  = async ({
   date,
   time: hour,
   type,
+  token
 }) => {
-  const response = await api.post(`api/v1/schedules`, {
+  const response = await api.post(`api/v1/schedules/new`, {
     roomId,
     lawyerId,
     userId,
     date,
     time: hour,
     type,
+  }, {
+    Authorization: `Bearer ${token}`,
   });
   return response.data; 
 };
@@ -71,14 +74,15 @@ export const deleteScheduleById = async (scheduleId) => {
 
 };
 
-export const infoSchedules = async (token) =>{
- const response = await api.get('/api/v1/schedules/data',{
+export const infoSchedules = async (token, idUser) =>{
+ const response = await api.post('/api/v1/schedules/data',{
+  idUser},{
   headers: {
     Authorization: `Bearer ${token}`,
   },
  })
- const { totalAgendamentos, totalAdvogadosCadastrados, totalMeetings, adjustedTotalHearings } = response.data;
- return {totalAdvogadosCadastrados, totalAgendamentos, totalMeetings, adjustedTotalHearings}
+ const { totalAgendamentos, totalAdvogadosCadastrados, totalMeetings, totalHearings, totalScheduleFromUser} = response.data;
+ return {totalAdvogadosCadastrados, totalAgendamentos, totalMeetings, totalHearings, totalScheduleFromUser}
 
 }
 

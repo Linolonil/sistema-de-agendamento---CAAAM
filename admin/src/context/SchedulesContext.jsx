@@ -26,7 +26,7 @@ export const ScheduleProvider = ({ children }) => {
   const [schedules, setSchedules] = useState([]);
   const [tipoAgendamento, setTipoAgendamento] = useState("meeting");
   const [userId, setUserId] = useState(null);
-  const [horario, setHorario] = useState("8:00");
+  const [horario, setHorario] = useState("08:00");
   const [date, setDate] = useState(new Date());
   const [rooms, setRooms] = useState([]);
   const [roomId, setRoomId] = useState(null);
@@ -68,7 +68,24 @@ export const ScheduleProvider = ({ children }) => {
     try {
       const response = await fetchAllSchedules(date, token);
       const { schedules } = response;
-      setSchedules(schedules);
+      const updatedSchedules = schedules.flatMap(schedule => {
+        const { time, type } = schedule;
+        const newTime = Number(time.split(":")[0]); 
+    
+        if (type === 'hearing') {
+          let originHour = time
+            return [
+                { ...schedule,originHour, time }, 
+                { ...schedule,originHour, time: `${String(newTime + 1).padStart(2, '0')}:00` }, 
+                { ...schedule,originHour, time: `${String(newTime + 2).padStart(2, '0')}:00` },
+            ];
+        }
+    
+        return schedule;
+    });
+    
+console.log(updatedSchedules)
+      setSchedules(updatedSchedules);
       setError(null);
       return;
     } catch (error) {
@@ -77,7 +94,8 @@ export const ScheduleProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+};
+
 
   // busca salas
   const fetchRooms = async () => {
@@ -279,14 +297,9 @@ export const ScheduleProvider = ({ children }) => {
     setOab,
     horario,
     deleteSchedule,
-    setRoomId,
-    setLawyer,
-    setUserId,
-    setDate,
     setHorario,
     fetchRooms,
     rooms,
-    setTipoAgendamento,
     tipoAgendamento,
     changeRoomState,
     createSchedule,
@@ -301,10 +314,15 @@ export const ScheduleProvider = ({ children }) => {
     lawyerName,
     tempOab,
     telefone,
+    lawyerFound,
+    setRoomId,
+    setLawyer,
+    setUserId,
+    setDate,
+    setTipoAgendamento,
     setLawyerName,
     setTempOab,
     setTelefone,
-    lawyerFound,
     setLawyerFound,
   };
 
