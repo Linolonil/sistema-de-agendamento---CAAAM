@@ -7,14 +7,24 @@ const scheduleSchema = new mongoose.Schema({
     },
     time: {
         type: String,
-        required: true, // Ex: "08:00"
+        required: true, 
         validate: {
             validator: function(value) {
-                // Validação para garantir que o horário esteja entre 08:00 e 17:00
                 const hour = parseInt(value.split(':')[0]);
                 return hour >= 8 && hour < 18;
             },
             message: 'O horário deve estar entre 08:00 e 17:00.'
+        }
+    },
+    endTime: {
+        type: String,
+        required: true,
+        validate: {
+            validator: function(value) {
+                const hour = parseInt(value.split(':')[0]);
+                return hour > 8 && hour <= 18;
+            },
+            message: 'O horário de término deve estar entre 08:00 e 18:00.'
         }
     },
     userId: {

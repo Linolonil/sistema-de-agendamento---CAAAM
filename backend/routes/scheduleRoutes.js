@@ -7,6 +7,9 @@ const router = express.Router();
 // Criar um novo agendamento
 router.post('/',authMiddleware, scheduleController.createSchedule);
 
+// nova ROTA pra criar agendamentos (FUNCIONAL!) 
+router.post('/new', scheduleController.newCreateSchedule);
+
 // todos os agendamentos
 router.get('/data',authMiddleware, scheduleController.getAll);
 
@@ -21,9 +24,6 @@ router.get('/schedules/day/:date', scheduleController.getSchedulesByDayAndHour);
 
 // Confirmar um agendamento
 router.patch('/:id/confirm',authMiddleware, scheduleController.confirmSchedule);
-
-// deletar todos os agendamentos 
-router.delete('/deleteAll',authMiddleware, scheduleController.deleteAllSchedules);
 
 // deletar um agendamento
 router.delete('/delete/:id',authMiddleware, scheduleController.deleteSchedules);
