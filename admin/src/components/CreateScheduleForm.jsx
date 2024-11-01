@@ -50,20 +50,19 @@ const CreateScheduleForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formattedDate = getCurrentDateAndHour(date);
-
+  
     if (roomId === null) {
       toast.info("Selecione uma sala!");
       return;
     }
-
-    // Adiciona verificação de segurança para lawyer
+  
     if (!lawyer || !lawyer.lawyer) {
       toast.error("Advogado não encontrado!");
       return;
     }
-
+  
     try {
-      setLoading(true); // Ativa o estado de carregamento
+      setLoading(true);
       const response = await createSchedule({
         date: formattedDate,
         hour: horario,
@@ -72,17 +71,23 @@ const CreateScheduleForm = () => {
         userId,
         type: tipoAgendamento,
       });
-      
-      toast.success("Agendamento criado com sucesso!"); // Notificação de sucesso
-      return response;
+  
+      if (response && response.success) {
+        toast.success("Agendamento criado com sucesso!");
+        return;
+      } else {
+        toast.error(`${response.message}`); 
+      }
     } catch (error) {
-      console.log(error);
-      toast.error("Erro ao criar agendamento!");
-      return;
+      console.error("Erro:", error);
+      console.log(error)
+      const errorMessage = error.data?.message || "Erro ao criar agendamento!";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
+  
 
   return (
     <form onSubmit={handleSubmit} className="p-1 mt-3 h-full w-full ">

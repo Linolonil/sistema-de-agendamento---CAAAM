@@ -10,6 +10,7 @@ import {
   Typography,
 } from "@material-tailwind/react";
 import { TrashIcon } from "lucide-react";
+import { ButtonView } from "./ButtonView";
 
 const getCurrentDateAndHour = (date) => {
   const year = date.getFullYear();
@@ -191,7 +192,7 @@ function ViewSchedules() {
                           </PopoverContent>
                         </Popover>
                       ) : (
-                        ""
+                        <ButtonView room={room} hourSchedule={hourTime} dateSchedule={date}/> 
                       )}
                     </td>
                   );

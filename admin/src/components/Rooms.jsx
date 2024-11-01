@@ -38,49 +38,56 @@ function Rooms() {
     horario,
   } = useContext(ScheduleContext);
 
-  const [selectedRoomId, setSelectedRoomId] = useState();
+  const [selectedRoomId, setSelectedRoomId] = useState(null);
 
   // Função para filtrar os agendamentos pela hora selecionada
   const getFilteredSchedules = () => {
-    const filteredSchedules =schedules.filter((schedule) => schedule.time === horario);
-    console.log(schedules.filter((schedule) => schedule.time === horario))
-    return filteredSchedules
+    return schedules.filter((schedule) => schedule.time === horario);
   };
 
-  const handleConfirm = (roomId) => {
-    confirmSchedule(roomId);
+  const handleConfirm = (scheduleId) => {
+    confirmSchedule(scheduleId);
   };
 
   const handleRoomSelect = (roomId) => {
-    if (roomId === selectedRoomId) {
-      setSelectedRoomId(null);
-      setRoomId(null);
-    } else {
-      setSelectedRoomId(roomId);
-      setRoomId(roomId);
-    }
+    // Alterna a seleção da sala
+    setSelectedRoomId((prevSelected) => (prevSelected === roomId ? null : roomId));
+    setRoomId(roomId);
   };
 
   const sendWhatsAppMessage = (schedule) => {
     if (!schedule) return;
-    
+
     const { roomId, date, originHour, time, endTime, lawyerId, type } = schedule;
     const roomNumber = roomId.number;
-    const dateFormatted = new Date(date).toLocaleDateString('pt-BR'); 
-    const startTime = originHour.split(":")[0]; 
-    const startTimeMeeting = time
-    const maxPeople = roomId.capacity; 
+    const dateFormatted = new Date(date).toLocaleDateString('pt-BR');
+    const startTimeMeeting = time;
+    const maxPeople = roomId.capacity;
     const number = lawyerId.phoneNumber;
 
     let message = "";
 
     if (type === "meeting") {
-        message = `Confirmado agendamento para reunião na Sala: ${roomNumber}.\nData: ${dateFormatted}.\nHorário: ${startTimeMeeting}:00 - ${endTime}:00.\nNúmero máximo de pessoas: ${maxPeople}.\nTolerância de 15 minutos, após o prazo a sala será disponibilizada para novo atendimento (em caso de atraso, avisar imediatamente o atendimento).`;
+      message = ` *Confirmação de Agendamento para Reunião*
+        \n\n
+        *Sala:* ${roomNumber}\n
+        *Data:* ${dateFormatted}\n
+        *Horário:* ${startTimeMeeting} - ${endTime}\n
+        *Capacidade Máxima:* ${maxPeople} pessoas\n
+        \n\n
+        *Observação:* Há uma tolerância de 15 minutos. Caso ocorra atraso, informe a recepção imediatamente, pois após esse período a sala poderá ser disponibilizada para outros atendimentos.`;
     } else if (type === "hearing") {
-        message = `Confirmado agendamento para audiência na Sala: ${roomNumber}.\nData: ${dateFormatted}.\nHorário: ${startTime}:00 - ${endTime}.\nNúmero máximo de pessoas: ${maxPeople}.\nTolerância de 15 minutos, após o prazo a sala será disponibilizada para novo atendimento (em caso de atraso, avisar imediatamente o atendimento).`;
+      message = ` *Confirmação de Agendamento para Audiência*
+        \n\n
+        *Sala:* ${roomNumber}\n
+        *Data:* ${dateFormatted}\n
+        *Horário:* ${originHour} - ${endTime}\n
+        *Capacidade Máxima:* ${maxPeople} pessoas\n
+        \n\n
+        *Observação:* Há uma tolerância de 15 minutos. Caso ocorra atraso, informe a recepção imediatamente, pois após esse período a sala poderá ser disponibilizada para outros atendimentos.`;
     } else {
-        console.error("Tipo de agendamento inválido.");
-        return;
+      console.error("Tipo de agendamento inválido.");
+      return;
     }
 
     const whatsappNumber = `+55${number}`; // Formato do número do WhatsApp
@@ -96,24 +103,23 @@ function Rooms() {
       // Verifica se a sala está ocupada
       const currentSchedule = filteredSchedules.find(schedule => schedule.roomId._id === room._id);
       const isOccupied = !!currentSchedule;
+
       return (
         <tr
           key={room._id}
           onClick={() => handleRoomSelect(room._id)}
-          className={`cursor-pointer transition-colors duration-300 hover:bg-gray-700 ${
-            selectedRoomId === room._id ? "hover:bg-green-600 bg-green-500" : ""
-          }`}
+          className={`cursor-pointer transition-colors duration-300 hover:bg-gray-700 ${selectedRoomId === room._id ? "bg-green-500" : ""}`}
         >
           <td className="w-10 border-b border-gray-600 p-2 text-center mx-auto">
             <Button
               className={`flex justify-center items-center rounded-full w-10 h-10 text-white text-xl font-bold text-center ${
-                isOccupied
-                  ? "bg-gray-700 hover:bg-gray-600"
-                  : "bg-green-700 hover:bg-green-800"
+                isOccupied && currentSchedule.confirmed
+                  ? "bg-green-700 hover:bg-green-800"
+                  : "bg-gray-700 hover:bg-gray-600"
               }`}
               onClick={(e) => {
                 e.stopPropagation();
-                if (isOccupied) {
+                if (isOccupied && currentSchedule) {
                   handleConfirm(currentSchedule._id);
                 }
               }}
@@ -123,10 +129,7 @@ function Rooms() {
           </td>
 
           <td className="border-b border-gray-600 p-2 text-center mx-auto">
-            <p
-              className="font-bold overflow-hidden text-ellipsis whitespace-nowrap text-gray-200"
-              title={isOccupied ? currentSchedule.lawyerId.name : "Disponível"}
-            >
+            <p className="font-bold overflow-hidden text-ellipsis whitespace-nowrap text-gray-200" title={isOccupied ? currentSchedule.lawyerId.name : "Disponível"}>
               {isOccupied ? currentSchedule.lawyerId.name.split(" ")[0] : "Disponível"}
             </p>
           </td>
@@ -138,20 +141,8 @@ function Rooms() {
           </td>
 
           <td className="border-b border-gray-600 p-2 text-center mx-auto">
-            <p
-              className={`rounded-full p-1 text-white ${
-                isOccupied && currentSchedule.type === "meeting"
-                  ? "bg-blue-500"
-                  : isOccupied && currentSchedule.type === "hearing"
-                  ? "bg-red-600"
-                  : "bg-gray-500"
-              }`}
-            >
-              {isOccupied
-                ? currentSchedule.type === "meeting"
-                  ? "Reunião"
-                  : "Audiência"
-                : ""}
+            <p className={`rounded-full p-1 text-white ${isOccupied && currentSchedule.type === "meeting" ? "bg-blue-500" : isOccupied && currentSchedule.type === "hearing" ? "bg-red-600" : "bg-gray-500"}`}>
+              {isOccupied ? (currentSchedule.type === "meeting" ? "Reunião" : "Audiência") : ""}
             </p>
           </td>
 
@@ -183,9 +174,7 @@ function Rooms() {
                           room.hasComputer
                         );
                       }}
-                      className={`hover:text-amber-200 transition-colors ease-in-out duration-200 ${
-                        room.hasTV ? "text-gray-200" : "text-gray-800"
-                      }`}
+                      className={`hover:text-amber-200 transition-colors ease-in-out duration-200 ${room.hasTV ? "text-gray-200" : "text-gray-800"}`}
                       title="TV"
                     >
                       <Tv />
@@ -201,9 +190,7 @@ function Rooms() {
                           room.hasComputer
                         );
                       }}
-                      className={`hover:text-amber-200 transition-colors ease-in-out duration-200 ${
-                        room.hasAirConditioning ? "text-gray-200" : "text-gray-800"
-                      }`}
+                      className={`hover:text-amber-200 transition-colors ease-in-out duration-200 ${room.hasAirConditioning ? "text-gray-200" : "text-gray-800"}`}
                       title="Ar-Condicionado"
                     >
                       <AirVent />
@@ -219,21 +206,14 @@ function Rooms() {
                           !room.hasComputer
                         );
                       }}
-                      className={`hover:text-amber-200 transition-colors ease-in-out duration-200 ${
-                        room.hasComputer ? "text-gray-200" : "text-gray-800"
-                      }`}
+                      className={`hover:text-amber-200 transition-colors ease-in-out duration-200 ${room.hasComputer ? "text-gray-200" : "text-gray-800"}`}
                       title="Computador"
                     >
                       <Laptop />
                     </button>
-                    <div
-                      className="flex justify-center items-center text-gray-200"
-                      title="Quantidade de Pessoas na sala"
-                    >
+                    <div className="flex justify-center items-center text-gray-200" title="Quantidade de Pessoas na sala">
                       <PersonStanding />
-                      <p className="text-gray-200 text-md font-bold">
-                        {room.capacity}
-                      </p>
+                      <p className="text-gray-200 text-md font-bold">{room.capacity}</p>
                     </div>
                   </div>
                 </div>
@@ -254,18 +234,17 @@ function Rooms() {
             </button>
           </td>
 
-          <td className="border-b border-gray-600 p-2 text-center mx-auto">
-            <Button
+          <td className="border-b border-gray-600 p-2 text-center mx-auto text-white">
+            <button
               onClick={(e) => {
                 e.stopPropagation();
-                deleteSchedule(currentSchedule._id);
+                deleteSchedule(currentSchedule?._id);
               }}
-              disabled={!isOccupied}
-              className={`bg-red-600 hover:bg-red-500 text-white font-bold p-2 rounded-full transition-colors duration-200`}
-              title="Excluir Agendamento"
+              className={`hover:text-red-600 transition-colors ease-in-out duration-200`}
+              title="Excluir agendamento"
             >
               <TrashIcon />
-            </Button>
+            </button>
           </td>
         </tr>
       );
@@ -273,13 +252,15 @@ function Rooms() {
   };
 
   return (
-    <div className="overflow-x-auto border border-gray-700 rounded-lg shadow-lg bg-gray-800">
-      <table className="w-full border-collapse bg-gray-800">
+    <div className="overflow-x-auto">
+      <table className="min-w-full table-auto border border-gray-600">
         <thead>
-          <tr>
+          <tr className="bg-gray-800 text-white">
             {TABLE_HEAD.map((head) => (
-              <th key={head} className="border-b border-gray-600 p-4 text-left">
-                <Typography className="font-bold text-gray-200">{head}</Typography>
+              <th key={head} className="border-b border-gray-600 p-2">
+                <Typography variant="h6" className="text-center">
+                  {head}
+                </Typography>
               </th>
             ))}
           </tr>

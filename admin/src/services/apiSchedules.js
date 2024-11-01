@@ -28,7 +28,7 @@ export const createUserLawyer = async (name, oab, phoneNumber) => {
   return response.data;
 };
 
-export const createNewSchedule  = async ({
+export const createNewSchedule = async ({
   roomId,
   lawyerId,
   userId,
@@ -37,23 +37,43 @@ export const createNewSchedule  = async ({
   type,
   token
 }) => {
-  const response = await api.post(`api/v1/schedules/new`, {
-    roomId,
+
+  console.log({  roomId,
     lawyerId,
     userId,
     date,
     time: hour,
-    type,
-  }, {
-    Authorization: `Bearer ${token}`,
-  });
-  return response.data; 
-};
+    type,})
 
-export const confirmScheduleNow = async (scheduleId) => {
-  const response = await api.patch(`api/v1/schedules/${scheduleId}/confirm`);
+  const response = await api.post(
+    `/api/v1/schedules/new`,
+    {
+      roomId,
+      lawyerId,
+      userId,
+      date,
+      time: hour,
+      type,
+    },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+
   return response.data;
 };
+
+export const confirmScheduleNow = async (scheduleId, token) => {
+  const response = await api.patch(`/api/v1/schedules/${scheduleId}/confirm`, {}, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+  
+  console.log(response);
+  return response.data;
+};
+
 
 export const changeRoom = async (roomId, {
   hasAirConditioning,

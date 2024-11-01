@@ -38,7 +38,6 @@ const checkConflictingSchedules = async (
 const createSchedule = async (req, res) => {
   try {
     const { roomId, lawyerId, userId, date, time, type } = req.body;
-
     const parsedDate = parseISO(date);
 
     // Verificar a disponibilidade da sala
@@ -123,13 +122,14 @@ const newCreateSchedule = async (req, res) => {
   try {
     const { roomId, lawyerId, userId, date, time, type } = req.body;
 
+    console.log( { roomId, lawyerId, userId, date, time, type } )
+
     const parsedDate = parseISO(date);
 
     // Verificar se o dia é válido (segunda a sexta)
     if (isWeekend(parsedDate)) {
       return res.status(400).json({
         success: false,
-
         message: "Agendamentos só podem ser feitos de segunda a sexta-feira.",
       });
     }
@@ -381,7 +381,10 @@ const confirmSchedule = async (req, res) => {
   try {
     const { id } = req.params;
 
+    
     const schedule = await Schedule.findById(id);
+    console.log(schedule)
+    
     if (!schedule)
       return res.status(404).json({ message: "Agendamento não encontrado" });
 

@@ -17,6 +17,9 @@ import { useState } from "react";
 const SchedulingPage = () => {
   const [type, setType] = useState("agendamento");
 
+
+  
+
   return (
     <Card className=" w-full h-full p-1 gap-2 flex justify-between items-center flex-row bg-dark ">
       <div className="w-[74%]  h-full">

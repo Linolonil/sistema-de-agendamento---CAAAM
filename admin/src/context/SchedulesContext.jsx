@@ -84,7 +84,6 @@ export const ScheduleProvider = ({ children }) => {
         return schedule;
     });
     
-console.log(updatedSchedules)
       setSchedules(updatedSchedules);
       setError(null);
       return;
@@ -169,12 +168,14 @@ console.log(updatedSchedules)
   }) => {
     setLoading(true);
     const cleanValues = () => {
-      setLawyerFound(""); // Ajuste conforme necessário (se o valor correto for booleano, use false)
+      setLawyerFound("");
       setOab("");
       setTempOab("");
       setTelefone("");
     };
-
+  
+    const token = localStorage.getItem("@Auth:token");
+  
     try {
       const response = await createNewSchedule({
         roomId,
@@ -183,22 +184,26 @@ console.log(updatedSchedules)
         date,
         time: hour,
         type,
+        token
       });
-
-      if (response.success) {
+  
+  
+      if (response?.success) {
         await fetchSchedules(selectedDate);
         cleanValues();
-        return;
+        return response;
       } else {
         setError("Erro ao criar agendamento!");
-        return;
       }
     } catch (error) {
+      console.error("Erro:", error);
       setError(error.response?.data || "Erro ao criar agendamento!");
+      return error.data
     } finally {
       setLoading(false);
     }
   };
+  
 
   // Função para o usuário atualizar a data
   const updateDate = (newDate) => {
@@ -207,6 +212,7 @@ console.log(updatedSchedules)
 
   // Função para confirmar um agendamento
   const confirmSchedule = async (scheduleId) => {
+    const token = localStorage.getItem("@Auth:token");
     setLoading(true);
     if (!scheduleId || scheduleId === undefined) {
       setError("Sala indisponível!");
@@ -215,7 +221,7 @@ console.log(updatedSchedules)
     }
 
     try {
-      await confirmScheduleNow(scheduleId);
+      await confirmScheduleNow(scheduleId, token);
       
       await fetchSchedules(selectedDate);
       
